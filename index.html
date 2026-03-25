@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CGO KPI Cascade — FY26 H2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242836; --surface3: #2e3344;
+    --text: #e2e4ea; --text-dim: #8b8fa5; --border: #333750;
+    --primary: #2c4c79; --teal: #007F7E; --ltblue: #64BCEA; --ltteal: #43C0BE;
+    --arch1: #22c55e; --arch2: #a855f7; --arch3: #f97316; --arch4: #3b82f6; --arch5: #6b7280;
+    --tsunami: #eab308; --foundational: #3b82f6;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+  .app { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: auto 1fr; height: 100vh; }
+  .header { grid-column: 1 / -1; padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+  .header h1 { font-size: 16px; font-weight: 600; white-space: nowrap; }
+  .header .subtitle { font-size: 12px; color: var(--text-dim); }
+  .tab-bar { display: flex; gap: 4px; margin-left: auto; }
+  .tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text-dim); border: 1px solid transparent; transition: all .15s; }
+  .tab:hover { background: var(--surface2); color: var(--text); }
+  .tab.active { background: var(--primary); color: #fff; border-color: var(--ltblue); }
+  .left { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 12px; }
+  .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-dim); margin: 12px 0 6px; }
+  .section-label:first-child { margin-top: 0; }
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .chip { padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: pointer; border: 1px solid var(--border); background: var(--surface2); color: var(--text-dim); transition: all .15s; white-space: nowrap; }
+  .chip:hover { border-color: var(--text-dim); color: var(--text); }
+  .chip.active { color: #fff; }
+  .chip[data-arch="1"].active { background: var(--arch1); border-color: var(--arch1); }
+  .chip[data-arch="2"].active { background: var(--arch2); border-color: var(--arch2); }
+  .chip[data-arch="3"].active { background: var(--arch3); border-color: var(--arch3); }
+  .chip[data-arch="4"].active { background: var(--arch4); border-color: var(--arch4); }
+  .chip[data-arch="5"].active { background: var(--arch5); border-color: var(--arch5); }
+  .chip[data-prog="tsunami"].active { background: var(--tsunami); border-color: var(--tsunami); color: #000; }
+  .chip[data-prog="foundational"].active { background: var(--foundational); border-color: var(--foundational); }
+  .tree { font-size: 12px; }
+  .tree-node { padding: 5px 8px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 1px 0; transition: background .1s; }
+  .tree-node:hover { background: var(--surface2); }
+  .tree-node.selected { background: var(--surface3); outline: 1px solid var(--ltblue); }
+  .tree-node.dimmed { opacity: .25; }
+  .tree-children { padding-left: 16px; border-left: 1px solid var(--border); margin-left: 10px; }
+  .arch-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .tree-node .role-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tree-node .arch-tag { font-size: 9px; color: var(--text-dim); flex-shrink: 0; }
+  .center { overflow-y: auto; padding: 24px 32px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0; }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Detail view */
+  .detail-empty { color: var(--text-dim); font-size: 14px; text-align: center; margin-top: 80px; }
+  .detail-header { margin-bottom: 20px; display: flex; align-items: flex-start; gap: 16px; }
+  .detail-header .info { flex: 1; }
+  .detail-header h2 { font-size: 20px; font-weight: 700; }
+  .detail-header .meta { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .arch-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; }
+  .rev-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: var(--surface3); color: var(--ltblue); margin-left: 6px; }
+
+  /* KPI summary bar */
+  .kpi-summary-bar { display: flex; height: 32px; border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
+  .kpi-summary-bar .seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; cursor: pointer; transition: opacity .15s; position: relative; }
+  .kpi-summary-bar .seg:hover { opacity: .85; }
+  .kpi-summary-bar .seg .seg-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
+
+  /* KPI sections */
+  .kpi-section { margin-bottom: 20px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .kpi-section-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background .1s; }
+  .kpi-section-header:hover { background: var(--surface3); }
+  .kpi-section-header .kpi-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .kpi-section-header .kpi-title .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .kpi-section-header .kpi-weight { font-size: 18px; font-weight: 800; }
+  .kpi-section-header .kpi-program { font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 600; margin-left: 8px; }
+  .kpi-program.tsunami { background: rgba(234,179,8,.15); color: var(--tsunami); }
+  .kpi-program.foundational { background: rgba(59,130,246,.15); color: var(--foundational); }
+  .kpi-program.both { background: rgba(67,192,190,.15); color: var(--ltteal); }
+  .kpi-section.dimmed { opacity: .2; }
+
+  /* Measures table */
+  .measures { padding: 0 16px 16px; }
+  .measures table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .measures th { text-align: left; padding: 6px 8px; color: var(--text-dim); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); }
+  .measures td { padding: 8px 8px; border-bottom: 1px solid rgba(51,55,80,.5); vertical-align: top; line-height: 1.4; }
+  .measures tr:last-child td { border-bottom: none; }
+  .measures .measure-name { color: var(--text); font-weight: 500; }
+  .measures .target { color: var(--ltteal); font-weight: 600; font-size: 11px; }
+  .measures .measured-by { color: var(--text-dim); font-size: 11px; }
+
+  /* Compare view */
+  .compare-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; cursor: pointer; transition: border-color .15s; }
+  .compare-card:hover { border-color: var(--ltblue); }
+  .compare-card.dimmed { opacity: .2; }
+  .cc-name { font-size: 12px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .cc-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .stacked-bar { height: 24px; border-radius: 4px; overflow: hidden; display: flex; margin-bottom: 6px; }
+  .stacked-bar .seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: #fff; }
+  .compare-legend { font-size: 10px; color: var(--text-dim); line-height: 1.6; }
+  .compare-legend span { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
+
+  /* Principles */
+  .principles { max-width: 800px; }
+  .principles h3 { font-size: 14px; font-weight: 600; margin: 16px 0 8px; color: var(--ltblue); }
+  .principles p { color: var(--text-dim); font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
+  .principles ol { padding-left: 20px; font-size: 13px; }
+  .principles li { margin-bottom: 6px; color: var(--text-dim); line-height: 1.5; }
+  .principles strong { color: var(--text); }
+  .rev-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12px; }
+  .rev-table th, .rev-table td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .rev-table th { color: var(--text-dim); font-weight: 600; font-size: 11px; }
+
+  .dept-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+  .dept-label:first-child { margin-top: 0; }
+
+  /* Org chart */
+  .org-controls { display: flex; gap: 6px; margin-bottom: 16px; }
+  .org-btn { padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); transition: all .15s; }
+  .org-btn:hover { border-color: var(--text-dim); color: var(--text); }
+  .org-btn.active { background: var(--primary); color: #fff; border-color: var(--ltblue); }
+  .org-grid { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .org-level { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 0; }
+  .org-node { padding: 8px 14px; border-radius: 8px; background: var(--surface2); border: 2px solid var(--border); cursor: pointer; text-align: center; min-width: 110px; max-width: 160px; transition: all .15s; }
+  .org-node:hover { border-color: var(--ltblue); }
+  .org-node.highlighted { border-color: var(--ltblue); box-shadow: 0 0 12px rgba(100,188,234,.3); }
+  .org-node .on-name { font-size: 11px; font-weight: 600; line-height: 1.3; }
+  .org-node .on-arch { font-size: 9px; margin-top: 2px; }
+  .org-connector-v { width: 2px; height: 12px; background: var(--border); margin: 0 auto; }
+  .org-branch { display: flex; flex-direction: column; align-items: center; }
+
+  /* Cascade flow */
+  .cascade-flow { display: flex; flex-direction: column; gap: 0; }
+  .cascade-connector { width: 2px; height: 20px; background: var(--border); margin: 0 0 0 30px; }
+  .cascade-role { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .cascade-role.is-selected { border-color: var(--ltblue); box-shadow: 0 0 16px rgba(100,188,234,.2); }
+  .cascade-role .cr-header { padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background .1s; }
+  .cascade-role .cr-header:hover { background: var(--surface2); }
+  .cascade-role .cr-indent { font-size: 11px; color: var(--text-dim); font-family: monospace; white-space: pre; }
+  .cascade-role .cr-name { font-size: 14px; font-weight: 700; flex: 1; }
+  .cascade-role .cr-meta { font-size: 10px; color: var(--text-dim); }
+  .cascade-role .cr-body { padding: 0 16px 16px; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <h1>CGO KPI Cascade</h1>
+      <div class="subtitle">FY26 H2 &middot; 28 roles &middot; 5 archetypes &middot; Click any role for full measures</div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab" data-view="org" onclick="switchView('org')">Org Structure</div>
+      <div class="tab active" data-view="detail" onclick="switchView('detail')">Cascade Detail</div>
+      <div class="tab" data-view="compare" onclick="switchView('compare')">Compare All</div>
+      <div class="tab" data-view="principles" onclick="switchView('principles')">Principles</div>
+    </div>
+  </div>
+  <div class="left">
+    <div class="section-label">Archetypes</div>
+    <div class="filter-chips" id="arch-filters"></div>
+    <div class="section-label">Program</div>
+    <div class="filter-chips" id="prog-filters">
+      <div class="chip active" data-prog="all" onclick="filterProg('all')">All</div>
+      <div class="chip" data-prog="tsunami" onclick="filterProg('tsunami')">Tsunami</div>
+      <div class="chip" data-prog="foundational" onclick="filterProg('foundational')">Foundational</div>
+    </div>
+    <div class="section-label">Org Tree</div>
+    <div class="legend" id="legend"></div>
+    <div class="tree" id="tree"></div>
+  </div>
+  <div class="center" id="center"></div>
+</div>
+
+<script>
+const KPI_COLORS = ['#22c55e','#3b82f6','#f97316','#a855f7','#6b7280'];
+const ARCH_COLORS = { 1:'#22c55e', 2:'#a855f7', 3:'#f97316', 4:'#3b82f6', 5:'#6b7280' };
+const ARCH_NAMES = { 1:'Revenue Driver', 2:'Brand & Creative', 3:'Revenue Leadership', 4:'Functional Leadership', 5:'Pipeline Support' };
+
+const roles = [
+  // ── DIRECT TO CGO ──
+  { id:'ail', name:'AI Innovation Lead (Further Scoping Required)', arch:1, parent:'cgo', chain:'CGO \u2192 AI Innovation Lead', code:'AIML-L2', rev:75,
+    kpis:[
+      {n:'AI Agent Delivery & Commercial Impact',w:40,p:'tsunami',measures:[
+        {m:'Core agents deployed per Growth function',t:'\u22653 per function (Sales, BD, Marketing) within 3 months',by:'Agent deployment log'},
+        {m:'Agent adoption by target users',t:'\u226570% within 1 month of deployment; \u226580% sustained',by:'Usage tracking (daily/weekly active users)'},
+        {m:'Quantified commercial impact ($)',t:'\u2265$500K annualised savings/revenue attributable to AI agents by end Q4',by:'Quarterly AI impact report \u2014 CGO + CFO sign-off'},
+        {m:'Marketing work completed via AI',t:'\u226530% within 6 months; \u226550% within 12 months',by:'Quarterly usage tracking'}
+      ]},
+      {n:'Cross-Function AI Enablement',w:20,p:'both',measures:[
+        {m:'Growth team AI adoption rate',t:'\u226580% of Growth staff using \u22651 AI agent weekly',by:'Usage tracking per team'},
+        {m:'Training delivery',t:'\u22651 session/month; \u226590% attendance for new agent rollouts',by:'Training log / attendance records'},
+        {m:'Team AI confidence score',t:'\u22654.0/5 across Growth team',by:'Quarterly capability assessment'},
+        {m:'Cross-functional AI projects (Care, Finance, QA)',t:'\u22651 agent deployed outside Growth per quarter',by:'Agent deployment log \u2014 cross-functional'}
+      ]},
+      {n:'Agent Operations & Reliability',w:15,p:'foundational',measures:[
+        {m:'Total agents deployed and maintained',t:'\u226515 by end Q4 (10 Growth + 5 cross-functional)',by:'Agent registry'},
+        {m:'Agent uptime',t:'\u226595%; all documented with runbooks',by:'Monthly uptime report'},
+        {m:'Time-to-deploy (new agent)',t:'\u22642 weeks from requirement to production',by:'Deployment log timestamps'},
+        {m:'Time saved tracked and reported',t:'\u226520 hrs saved/month across teams; reported monthly',by:'Efficiency report'}
+      ]},
+      {n:'Stakeholder CSAT & Delivery Quality',w:15,p:'both',measures:[
+        {m:'Cross-functional stakeholder CSAT',t:'\u22654.0/5',by:'Quarterly survey (Sales, BD, Marketing, Care, Ops)'},
+        {m:'Quarterly AI impact report (commercial + efficiency)',t:'Delivered on time with documented $ impact and adoption metrics',by:'CGO review / sign-off'},
+        {m:'Service delivery within SLA',t:'\u226590% of requests within agreed SLA',by:'Asana SLA reporting'}
+      ]},
+      {n:'Innovation & Culture',w:10,p:'both',measures:[
+        {m:'Tool evaluations',t:'\u22653/quarter with recommendation; \u22651 adopted',by:'Tool evaluation log'},
+        {m:'Knowledge sharing',t:'\u22651 demo/month; tech stack inventory current',by:'Demo log / inventory'},
+        {m:'Meeting attendance and contribution',t:'100%; \u22651 AI innovation insight per week to CGO',by:'Meeting records / stand-up notes'}
+      ]}
+    ]},
+  { id:'hcx', name:'Head of CX (Further Scoping Required)', arch:4, parent:'cgo', chain:'CGO \u2192 Head of CX', code:'HCX-L3', rev:30,
+    kpis:[
+      {n:'Enterprise CSAT & Experience Governance',w:30,p:'both',measures:[
+        {m:'Enterprise CSAT framework operational',t:'Baseline established by month 3; tracked monthly across all customer-facing functions',by:'CSAT reporting framework / survey platform'},
+        {m:'CSAT variance between departments',t:'<15% between highest and lowest team',by:'Cross-team CSAT comparison (monthly)'},
+        {m:'Enterprise CSAT score (client)',t:'\u22654.0/5 (aggregate across Sales, Care, Accounts)',by:'Monthly client survey'},
+        {m:'Monthly CX performance report to CGO',t:'On time; actionable insights with department-level breakdowns',by:'Report submission log / CGO review'}
+      ]},
+      {n:'Complaint Resolution & Service Recovery',w:25,p:'both',measures:[
+        {m:'Complaint resolution within SLA',t:'\u226595% resolved within published SLA (varies by severity)',by:'Zoho CRM complaints module'},
+        {m:'Complaint volume trend',t:'Reducing QoQ (controllable complaints)',by:'Zoho CRM \u2014 controllable vs uncontrollable split'},
+        {m:'Root cause analysis coverage',t:'100% of recurring complaint categories analysed; systemic fixes tracked',by:'Quarterly RCA report to CGO'},
+        {m:'Service recovery CSAT',t:'\u22653.5/5 post-complaint satisfaction',by:'Post-resolution survey'}
+      ]},
+      {n:'CX Standards & Embedment',w:20,p:'foundational',measures:[
+        {m:'CX interaction model embedded across customer-facing teams',t:'100% of teams trained and audited by end Q4',by:'QA audit / adoption tracker'},
+        {m:'Telephony standards (call answering & callback)',t:'Answer rate \u226585%; callback <30min; improving QoQ',by:'Aircall reporting'},
+        {m:'Email/SMS cadence standards reviewed',t:'100% of automated comms audited and optimised',by:'Comms audit log'},
+        {m:'AI QA integration (CX lens)',t:'CX quality criteria embedded in AI QA scoring framework',by:'AI QA audit \u2014 CX-specific dimensions tracked'}
+      ]},
+      {n:'Cross-Functional CX Improvement',w:15,p:'both',measures:[
+        {m:'CX governance cadence operating',t:'Monthly cross-functional CX rhythm with Sales, Care, Accounts, Compliance reps',by:'Meeting log / action tracker'},
+        {m:'Department CX improvement plans',t:'100% of customer-facing functions have active improvement plans',by:'Improvement plan tracker'},
+        {m:'Care-to-Growth handover experience',t:'Client experience at care\u2192sales/retention handover points \u22654.0/5',by:'Handover CSAT survey (post-referral)'},
+        {m:'Onboarding-to-care transition CSAT',t:'\u22654.0/5 at 30-day and 90-day post-onboarding',by:'Post-transition survey'}
+      ]},
+      {n:'Stakeholder CSAT & Culture',w:10,p:'both',measures:[
+        {m:'Cross-functional stakeholder CSAT',t:'\u22654.0/5',by:'Quarterly survey (Sales, Care, Accounts, Compliance leaders)'},
+        {m:'CX awareness across org',t:'\u226580% of customer-facing staff can articulate CX standards',by:'Quarterly pulse / spot-check'}
+      ]}
+    ]},
+
+  // ── SALES ──
+  { id:'gms', name:'GM Sales', arch:3, parent:'cgo', chain:'CGO \u2192 GM Sales', code:'GMS-GM', rev:65,
+    kpis:[
+      {n:'Acquisition & Revenue',w:40,p:'tsunami',measures:[
+        {m:'Department client acquisitions vs Growth budget',t:'Team to hit Growth budget (Sales contribution)',by:'CRM onboarding tracker'},
+        {m:'B2C contribution to total company onboards',t:'\u226545%',by:'Attribution reporting'},
+        {m:'SQL conversion rate',t:'\u226560%',by:'CRM pipeline reporting'},
+        {m:'Speed to lead (inbound)',t:'\u22645 min (95% of the time)',by:'CRM/Aircall timestamps'},
+        {m:'Forecast accuracy (department)',t:'+/-5%',by:'Forecast vs actuals'}
+      ]},
+      {n:'Client Retention & Churn Reduction',w:15,p:'tsunami',measures:[
+        {m:'Pre-service churn rate (signed but never activated)',t:'10% \u2192 7% by Dec 2026',by:'CRM pre-service tracking'},
+        {m:'Total in-service churn rate (department)',t:'\u22642.4%/month',by:'Terminations / active clients (monthly)'},
+        {m:'At-risk client save rate',t:'\u226525% of flagged at-risk clients retained',by:'CRM at-risk register + save outcomes'},
+        {m:'Win-back conversion rate',t:'\u226515% of churned clients within 90 days',by:'CRM win-back tracking'},
+        {m:'Care-to-Growth referral response time',t:'\u226448hrs from COO-Care flag to concierge/retention contact',by:'CRM referral tracking'}
+      ]},
+      {n:'Utilisation & Platform Fee Revenue',w:10,p:'tsunami',measures:[
+        {m:'Concierge-attributed utilisation uplift',t:'>+5% per client intervention (90-day measurement)',by:'Portal utilisation report \u2014 concierge-engaged vs control'},
+        {m:'Concierge client engagement rate',t:'\u226590% of flagged under-utilised clients contacted within 5 days',by:'CRM concierge activity tracking'},
+        {m:'Platform fee revenue growth (concierge-attributed)',t:'Measurable improvement vs non-engaged clients',by:'Finance reporting \u2014 A/B tracking'}
+      ]},
+      {n:'Foundational Delivery',w:15,p:'foundational',isThemed:true,measures:[
+        {m:'Pipeline & Lead Management',t:'Speed to lead SLA <=5min >=95%; >=80% dormant leads in active journey',by:'Aircall/CRM timestamp audit; Automation platform',theme:true},
+        {m:'Process, Playbooks & Capability',t:'Sales + retention playbooks published, team certified; 100% weekly 1:1s',by:'Training log + assessment; 1:1 log audit',theme:true},
+        {m:'CRM, Data & Systems',t:'CRM data >=95% complete; migration checklist done; 100% AI call notes',by:'Monthly CRM audit; checklist sign-off',theme:true},
+        {m:'Performance Visibility & QA',t:'QA >=95% call coverage; dashboards live; churn segmentation tracked monthly',by:'QA audit; dashboard tracking; report audit',theme:true}
+      ]},
+      {n:'Leadership, CSAT & Culture',w:20,p:'both',measures:[
+        {m:'Client CSAT (post-onboarding)',t:'\u22654.0/5',by:'Post-onboarding survey'},
+        {m:'Department QA/Sales Coaching pass rate',t:'\u226595%',by:'AI QA audit \u2014 department aggregate'},
+        {m:'Stakeholder CSAT (cross-functional)',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'Team engagement score',t:'\u22654.0/5',by:'Quarterly pulse survey'},
+        {m:'Team attrition',t:'\u22645% annualised',by:'HR records'}
+      ]}
+    ]},
+  { id:'stl', name:'Sales Team Leader', arch:3, parent:'gms', chain:'CGO \u2192 GM Sales \u2192 Sales TL', code:'STL-L3', rev:70,
+    kpis:[
+      {n:'Pod Revenue & Conversion',w:55,p:'tsunami',measures:[
+        {m:'Team conversion vs target',t:'>=80% of reps hitting 15/week',by:'Weekly sales report (Zoho)'},
+        {m:'Team SQL conversion',t:'>=60%',by:'CRM pipeline'},
+        {m:'Pipeline forecast accuracy',t:'+/-10%',by:'CRM pipeline vs actuals'},
+        {m:'Speed to lead (team)',t:'<=5 min for inbound',by:'CRM/Aircall timestamps'}
+      ]},
+      {n:'Activity & Floor Management',w:15,p:'tsunami',measures:[
+        {m:'Team activity targets',t:'>=80% of reps hitting daily targets',by:'Aircall data'},
+        {m:'Team attendance',t:'>=90%',by:'HR roster'}
+      ]},
+      {n:'Foundational Delivery',w:10,p:'foundational',measures:[
+        {m:'Weekly coaching & pipeline review per direct report',t:'100%',by:'1:1 log / call review log'},
+        {m:'Underperformers on documented plans',t:'100% within 2 weeks',by:'Performance records'},
+        {m:'Team CRM data quality',t:'>=95% completeness on mandatory fields',by:'Monthly CRM audit'}
+      ]},
+      {n:'Client & Team CSAT',w:10,p:'both',measures:[
+        {m:'Team CSAT (engagement)',t:'>=4.0/5',by:'Quarterly pulse survey'},
+        {m:'Client CSAT (post-onboarding)',t:'>=4.0/5',by:'Post-onboarding survey'},
+        {m:'QA/Sales Coaching pass rate',t:'\u226595%',by:'AI QA audit \u2014 team aggregate'}
+      ]},
+      {n:'Compliance & Culture',w:10,p:'both',measures:[
+        {m:'Onboarding retention (signed to billable)',t:'>=95%',by:'CRM pipeline tracking'},
+        {m:'Team attrition',t:'<15% annualised',by:'HR records'},
+        {m:'Cross-functional collaboration',t:'>=1 joint initiative/quarter with BD/Care',by:'Collaboration log'}
+      ]}
+    ]},
+  { id:'ssr', name:'Senior Sales Rep', arch:1, parent:'stl', chain:'CGO \u2192 GM Sales \u2192 Sales TL \u2192 Senior Sales Rep', code:'SSR-L2', rev:80,
+    kpis:[
+      {n:'Revenue & Conversion',w:60,p:'tsunami',measures:[
+        {m:'Clients converted per week',t:'>=15',by:'Weekly sales report (Zoho)'},
+        {m:'SQL conversion rate',t:'>=60%',by:'CRM pipeline'},
+        {m:'Lead management (zero orphans, timely contact)',t:'100% within SLA',by:'CRM lead age reporting'}
+      ]},
+      {n:'Activity',w:20,p:'tsunami',measures:[
+        {m:'Outbound calls (>60s) per day',t:'\u226530',by:'Aircall data'},
+        {m:'Connected time per day',t:'>=4 hours',by:'Aircall data'},
+        {m:'Attendance',t:'>=95%; zero late starts',by:'HR roster / TL log'}
+      ]},
+      {n:'Client CSAT & Quality',w:10,p:'both',measures:[
+        {m:'QA/Sales Coaching pass rate',t:'\u226595%',by:'AI QA audit \u2014 call/interaction scoring'},
+        {m:'Call flow adherence',t:'100%',by:'Call review notes'},
+        {m:'Client CSAT',t:'>=4.0/5',by:'Post-onboarding survey'}
+      ]},
+      {n:'Onboarding & Retention',w:5,p:'both',measures:[
+        {m:'Signed-to-billable retention',t:'>=95%',by:'CRM tracking'},
+        {m:'Zero complaints from incorrect expectations',t:'Zero',by:'Complaint log'}
+      ]},
+      {n:'Compliance & Culture',w:5,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'},
+        {m:'Peer support (buddy/shadowing)',t:'>=2 sessions/week',by:'TL tracking log'}
+      ]}
+    ]},
+  { id:'sr', name:'Sales Rep', arch:1, parent:'stl', chain:'CGO \u2192 GM Sales \u2192 Sales TL \u2192 Sales Rep', code:'SR-L1', rev:80,
+    kpis:[
+      {n:'Revenue & Conversion',w:60,p:'tsunami',measures:[
+        {m:'Clients converted per week',t:'>=15',by:'Weekly sales report (Zoho)'},
+        {m:'SQL conversion rate',t:'>=60%',by:'CRM pipeline'},
+        {m:'Lead management (zero orphans, timely contact)',t:'100% within SLA',by:'CRM lead age reporting'}
+      ]},
+      {n:'Activity',w:20,p:'tsunami',measures:[
+        {m:'Outbound calls (>60s) per day',t:'\u226530',by:'Aircall data'},
+        {m:'Connected time per day',t:'>=4 hours',by:'Aircall data'},
+        {m:'Attendance',t:'>=95%; zero late starts',by:'HR roster / TL log'}
+      ]},
+      {n:'Client CSAT & Quality',w:10,p:'both',measures:[
+        {m:'QA/Sales Coaching pass rate',t:'\u226595%',by:'AI QA audit \u2014 call/interaction scoring'},
+        {m:'Call flow adherence',t:'100%',by:'Call review notes'},
+        {m:'Client CSAT',t:'>=4.0/5',by:'Post-onboarding survey'}
+      ]},
+      {n:'Onboarding & Retention',w:5,p:'both',measures:[
+        {m:'Signed-to-billable retention',t:'>=95%',by:'CRM tracking'},
+        {m:'Zero complaints from incorrect expectations',t:'Zero',by:'Complaint log'}
+      ]},
+      {n:'Compliance & Culture',w:5,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'},
+        {m:'Training attendance and coachability',t:'100% training; >=80% coaching items closed',by:'Training records / coaching log'}
+      ]}
+    ]},
+  { id:'sso', name:'Sales Support Officer', arch:1, parent:'stl', chain:'CGO \u2192 GM Sales \u2192 Sales TL \u2192 Sales Support Officer', code:'SSO-L0', rev:80,
+    kpis:[
+      {n:'Inbound Performance & Triage',w:60,p:'tsunami',measures:[
+        {m:'Missed call rate',t:'<8%; within 3 rings; callbacks <30min',by:'Aircall data'},
+        {m:'Triage and handover quality',t:'100% correct routing; >=90% leads captured with full details',by:'TL audit / CRM / rep feedback'},
+        {m:'Caller experience CSAT',t:'>=4.0/5',by:'Post-call survey / TL monitoring'}
+      ]},
+      {n:'Activity & Responsiveness',w:20,p:'tsunami',measures:[
+        {m:'Shift attendance',t:'>=95%; zero late starts',by:'HR roster / TL log'},
+        {m:'Available time on phones',t:'>=90%',by:'Aircall data'},
+        {m:'Inbox management',t:'All items responded/routed <2hrs; zero unactioned at shift end',by:'Inbox audit'}
+      ]},
+      {n:'Client CSAT & Quality',w:10,p:'both',measures:[
+        {m:'Handover quality (Sales Rep satisfaction)',t:'>=4.0/5',by:'Monthly feedback survey'},
+        {m:'Handover completeness',t:'>=95% complete handovers',by:'CRM audit'},
+        {m:'QA/Sales Coaching pass rate',t:'\u226595%',by:'AI QA audit \u2014 call/interaction scoring'}
+      ]},
+      {n:'CRM & Data Capture',w:5,p:'foundational',measures:[
+        {m:'CRM data completeness',t:'100% interactions logged; 100% mandatory fields',by:'CRM audit'}
+      ]},
+      {n:'Compliance & Culture',w:5,p:'both',measures:[
+        {m:'Meeting attendance and contribution',t:'100%; >=1 inbound trend insight/week',by:'Meeting records / stand-up notes'}
+      ]}
+    ]},
+  { id:'cec', name:'Client Experience Coordinator', arch:1, parent:'gms', chain:'CGO \u2192 GM Sales \u2192 Client Experience Coordinator', code:'CEC-L2', rev:80,
+    kpis:[
+      {n:'Utilisation Uplift & Platform Fee Revenue',w:50,p:'tsunami',measures:[
+        {m:'Utilisation uplift per intervention',t:'>+5% service utilisation per client (90-day measurement)',by:'Portal utilisation report \u2014 pre/post concierge engagement'},
+        {m:'Under-utilised client engagement rate',t:'\u226590% of flagged clients (<60% utilisation) contacted within 5 days',by:'CRM concierge activity tracking'},
+        {m:'Clients connected to \u22651 new service',t:'\u226580% of engaged clients',by:'Service activation records'}
+      ]},
+      {n:'Concierge Onboarding & Upsell',w:20,p:'tsunami',measures:[
+        {m:'30-day concierge contact rate (new SM clients)',t:'100% contacted',by:'CRM contact tracking'},
+        {m:'SM to FC upsells/month',t:'10/month (ramping to 20)',by:'CRM upsell reporting'},
+        {m:'Coordination loading',t:'\u226520% of client base on fully coordinated',by:'Finance reporting'}
+      ]},
+      {n:'Activity & Client Engagement',w:15,p:'tsunami',measures:[
+        {m:'Outbound calls (>60s) per day',t:'\u226520',by:'Aircall data'},
+        {m:'Connected time per day',t:'\u22654 hours',by:'Aircall data'},
+        {m:'Outbound dials per day',t:'\u226530',by:'Aircall data'},
+        {m:'Care-to-Growth referral response',t:'\u22645 days from COO-Care flag to concierge contact',by:'CRM referral tracking'}
+      ]},
+      {n:'Client CSAT & Quality',w:10,p:'both',measures:[
+        {m:'New onboard CSAT',t:'\u22654.0/5',by:'Post-onboarding survey (day 14)'},
+        {m:'QA/Sales Coaching pass rate',t:'\u226595%',by:'AI QA audit \u2014 call/interaction scoring'},
+        {m:'Positive reviews generated',t:'\u22654/month; \u22654.5/5 average',by:'Review platform tracking'}
+      ]},
+      {n:'CRM, Compliance & Culture',w:5,p:'both',measures:[
+        {m:'CRM logging and platform compliance',t:'100% within 24hrs; zero incomplete records',by:'CRM audit'},
+        {m:'Meeting attendance and contribution',t:'100%; \u22651 utilisation insight/week',by:'Meeting records'}
+      ]}
+    ]},
+  { id:'csrs', name:'Client Success & Retention Specialist', arch:1, parent:'gms', chain:'CGO \u2192 GM Sales \u2192 Client Success & Retention Specialist', code:'CSRS-L2', rev:80,
+    kpis:[
+      {n:'Saves & Revenue Protected',w:30,p:'tsunami',measures:[
+        {m:'At-risk client save rate',t:'\u226525% of flagged at-risk clients retained',by:'CRM at-risk register + save outcomes'},
+        {m:'Saves per month',t:'\u226524',by:'CRM retention reporting'},
+        {m:'Revenue protected per month',t:'\u2265$24K',by:'Finance reporting'}
+      ]},
+      {n:'Win-Back & Re-Engagement',w:15,p:'tsunami',measures:[
+        {m:'Win-back conversion rate',t:'\u22655% of churned clients re-engaged within 90 days',by:'CRM win-back tracking'},
+        {m:'Win-back revenue recovered',t:'Tracked and reported monthly',by:'Finance reporting'}
+      ]},
+      {n:'Outreach & Activity',w:20,p:'tsunami',measures:[
+        {m:'Outbound calls (>60s) per day',t:'\u226530',by:'Aircall data'},
+        {m:'Connected time per day',t:'\u22652 hours',by:'Aircall data'},
+        {m:'Proactive at-risk interventions (CIO churn model)',t:'\u226510/month from churn risk scores; \u226550% accuracy',by:'CRM intervention log + CIO model output'}
+      ]},
+      {n:'Pre-Service Churn Prevention',w:10,p:'foundational',measures:[
+        {m:'Pre-service churn rate (signed but not activated)',t:'10% \u2192 7% by Dec 2026',by:'CRM pre-service tracking'},
+        {m:'Pre-onboarding contact rate',t:'100% of signed clients contacted within 48hrs',by:'CRM contact log'},
+        {m:'Activation acceleration',t:'Median days to first service reducing QoQ',by:'CRM milestone tracking'}
+      ]},
+      {n:'Client CSAT, Quality & Culture',w:25,p:'both',measures:[
+        {m:'Client feedback from retention interactions',t:'\u22654.0/5',by:'Post-retention survey'},
+        {m:'QA/Sales Coaching pass rate',t:'\u226595%',by:'AI QA audit \u2014 call/interaction scoring'},
+        {m:'Save sustainability',t:'<10% re-terminate within 90 days',by:'CRM re-termination tracking'},
+        {m:'Care-to-Growth referral response time',t:'\u226448hrs from COO-Care flag to retention contact',by:'CRM referral tracking'},
+        {m:'CRM logging and termination reason capture',t:'100% within 24hrs; controllable vs uncontrollable split',by:'CRM audit'},
+        {m:'Meeting attendance and contribution',t:'100%; \u22651 retention insight/week',by:'Meeting records'}
+      ]}
+    ]},
+
+  // ── BUSINESS DEVELOPMENT ──
+  { id:'gmbd', name:'GM BD', arch:3, parent:'cgo', chain:'CGO \u2192 GM BD', code:'GMBD-GM', rev:65,
+    kpis:[
+      {n:'Commercial Performance & Client Onboarding',w:40,p:'tsunami',measures:[
+        {m:'Department client onboards vs budget',t:'Team to hit budget',by:'CRM onboarding tracker / team dashboard'},
+        {m:'Referral volume growth',t:'\u22655% QoQ',by:'CRM referral reporting'},
+        {m:'BD contribution to total company onboards',t:'\u226555% of all new clients',by:'Attribution reporting'},
+        {m:'Department referral-to-onboard conversion',t:'\u226525%',by:'CRM pipeline dashboard'},
+        {m:'Forecast accuracy (department)',t:'+/-5%',by:'Forecast vs actuals'}
+      ]},
+      {n:'Pipeline & Partner Network',w:15,p:'tsunami',measures:[
+        {m:'Net new partners per team member',t:'\u22652 per PM per quarter',by:'Partner database'},
+        {m:'New coordinator activations (department)',t:'\u22655 per PM per month',by:'CRM partner onboarding log'},
+        {m:'Non-traditional B2B partnership wins',t:'\u22651 large new partnership/quarter',by:'CRM deal tracking'}
+      ]},
+      {n:'Partner Retention & Growth',w:10,p:'tsunami',measures:[
+        {m:'Department partner retention',t:'\u226595%',by:'Portfolio analysis'},
+        {m:'Department active partner ratio',t:'\u226570% (from current)',by:'CRM partner tracking'},
+        {m:'Dormant partner reactivation',t:'<40% dormant (from 57%)',by:'Portfolio analysis'},
+        {m:'WBW concentration risk mitigated',t:'No single partner >15% of total referrals',by:'CRM referral reporting'}
+      ]},
+      {n:'Foundational Delivery',w:15,p:'foundational',measures:[
+        {m:'Pipeline & Lead Management',t:'NDIS pipeline >=20 partners; partner nurture sequences live; B2B data segmented',by:'Partner database; email platform; CRM audit'},
+        {m:'Process, Playbooks & Capability',t:'BD playbooks published, team certified; KPI framework tracking; monthly coaching',by:'Training log; scorecard platform; coaching log'},
+        {m:'CRM, Data & Systems',t:'Zoho workflows automated; Partnership_Manager field 100% adopted',by:'Workflow audit; CRM field audit'},
+        {m:'Performance Visibility & QA',t:'Partner health dashboard live; monthly QA reviews per PM',by:'Dashboard audit; QA audit'}
+      ]},
+      {n:'Leadership, CSAT & Culture',w:20,p:'both',measures:[
+        {m:'Partner satisfaction (NPS)',t:'\u22659 NPS; \u22654.0/5 CSAT',by:'Quarterly partner survey'},
+        {m:'BD-to-Sales handover SLA',t:'\u226595%; 0% dropped referrals',by:'Handover log / CRM audit'},
+        {m:'Stakeholder CSAT (cross-functional)',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'Team engagement score',t:'\u22654.0/5',by:'Quarterly pulse survey'},
+        {m:'Team attrition',t:'\u22645% annualised',by:'HR records'}
+      ]}
+    ]},
+  { id:'pmtl', name:'PM Team Leader', arch:3, parent:'gmbd', chain:'CGO \u2192 GM BD \u2192 PM Team Leader', code:'PMTL-L3', rev:65,
+    kpis:[
+      {n:'Personal & Team Onboards',w:40,p:'tsunami',measures:[
+        {m:'Personal clients onboarded/month',t:'40',by:'CRM: deals reaching signed stage'},
+        {m:'Team total client onboards',t:'240/month (6 PMs x 40)',by:'CRM team dashboard'},
+        {m:'Referral-to-onboard conversion (personal)',t:'\u226525%',by:'CRM pipeline'}
+      ]},
+      {n:'Pipeline Growth & Activity',w:25,p:'tsunami',measures:[
+        {m:'Personal: new P1 partners/month',t:'2-3',by:'CRM: coordinators reaching \u22655 refs/month'},
+        {m:'Personal: new coordinators onboarded/month',t:'8-10',by:'CRM partner onboarding log'},
+        {m:'Personal: connected calls (>60s)/day',t:'20',by:'CRM call log'},
+        {m:'Personal: connected time/day',t:'2 hours',by:'CRM activity log'},
+        {m:'Personal: new meetings booked/month',t:'15',by:'Calendar / CRM log'}
+      ]},
+      {n:'Foundational Delivery',w:15,p:'foundational',measures:[
+        {m:'Monthly coaching & pipeline review per direct report',t:'100%',by:'Meeting log'},
+        {m:'Underperformers on plans',t:'Within 2 weeks of identification',by:'Performance records'},
+        {m:'CRM accuracy (team)',t:'\u226595%',by:'CRM audit'}
+      ]},
+      {n:'Partner & Team CSAT',w:10,p:'both',measures:[
+        {m:'Coordinator CSAT',t:'\u22658/10',by:'Partner satisfaction survey'},
+        {m:'Team engagement',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'BD-to-Sales handover SLA',t:'\u226595%',by:'Handover log'}
+      ]},
+      {n:'Compliance & Culture',w:10,p:'both',measures:[
+        {m:'Partnership agreement adherence (team)',t:'100%',by:'Partnership terms review'},
+        {m:'Team attrition',t:'\u22645%',by:'HR records'}
+      ]}
+    ]},
+  { id:'spm', name:'Senior Partnership Manager', arch:1, parent:'pmtl', chain:'CGO \u2192 GM BD \u2192 PM TL \u2192 Senior Partnership Manager', code:'SPM-L2', rev:80,
+    kpis:[
+      {n:'Client Onboards',w:60,p:'tsunami',measures:[
+        {m:'Clients onboarded/month',t:'50',by:'CRM: deals reaching signed stage'},
+        {m:'Referral-to-onboard conversion',t:'Baseline H2; target \u226525%',by:'CRM pipeline'}
+      ]},
+      {n:'Pipeline Growth & Activity',w:20,p:'tsunami',measures:[
+        {m:'New P1 partners developed/month',t:'3-4',by:'CRM: coordinators reaching \u22655 refs/month'},
+        {m:'New coordinators onboarded/month',t:'10-12',by:'CRM partner onboarding log'},
+        {m:'Connected calls (>60s)/day',t:'20',by:'CRM call log'},
+        {m:'Connected time per day',t:'\u22652 hours',by:'CRM activity log'},
+        {m:'New meetings booked/month',t:'20',by:'Calendar / CRM log'}
+      ]},
+      {n:'Retention & CSAT',w:10,p:'both',measures:[
+        {m:'Active coordinator count maintained',t:'60-70',by:'CRM: referral in last 90 days'},
+        {m:'P1 partner count maintained',t:'10-12',by:'CRM: \u22655 refs/month'},
+        {m:'Coordinator CSAT',t:'\u22658/10',by:'Partner satisfaction survey'}
+      ]},
+      {n:'Data & Compliance',w:5,p:'foundational',measures:[
+        {m:'Partnership agreement adherence',t:'100%',by:'Agreement terms review'}
+      ]},
+      {n:'Culture',w:5,p:'both',measures:[
+        {m:'Meeting attendance and contribution',t:'100%',by:'Meeting records'},
+        {m:'Junior PM mentoring',t:'\u22651 coaching session/week',by:'TL observation'}
+      ]}
+    ]},
+  { id:'pm', name:'Partnership Manager', arch:1, parent:'pmtl', chain:'CGO \u2192 GM BD \u2192 PM TL \u2192 Partnership Manager', code:'PM-L1', rev:80,
+    kpis:[
+      {n:'Client Onboards',w:60,p:'tsunami',measures:[
+        {m:'Clients onboarded/month',t:'40',by:'CRM: deals reaching signed stage'},
+        {m:'Referral-to-onboard conversion',t:'Baseline H2; target \u226525%',by:'CRM pipeline'}
+      ]},
+      {n:'Pipeline Growth & Activity',w:20,p:'tsunami',measures:[
+        {m:'New P1 partners developed/month',t:'2-3',by:'CRM: coordinators reaching \u22655 refs/month'},
+        {m:'New coordinators onboarded/month',t:'8-10',by:'CRM partner onboarding log'},
+        {m:'Connected calls (>60s)/day',t:'20',by:'CRM call log'},
+        {m:'Connected time per day',t:'\u22652 hours',by:'CRM activity log'},
+        {m:'New meetings booked/month',t:'20',by:'Calendar / CRM log'}
+      ]},
+      {n:'Retention & CSAT',w:10,p:'both',measures:[
+        {m:'Active coordinator count maintained',t:'50-60',by:'CRM: referral in last 90 days'},
+        {m:'P1 partner count maintained',t:'8-10',by:'CRM: \u22655 refs/month'},
+        {m:'Coordinator CSAT',t:'\u22658/10',by:'Partner satisfaction survey'}
+      ]},
+      {n:'Data & Compliance',w:5,p:'foundational',measures:[
+        {m:'Partnership agreement adherence',t:'100%',by:'Agreement terms review'}
+      ]},
+      {n:'Culture',w:5,p:'both',measures:[
+        {m:'Meeting attendance and contribution',t:'100%',by:'Meeting records'}
+      ]}
+    ]},
+  { id:'apm', name:'Associate Partnership Manager', arch:5, parent:'pmtl', chain:'CGO \u2192 GM BD \u2192 PM TL \u2192 Associate Partnership Manager', code:'APM-L1', rev:60,
+    kpis:[
+      {n:'Referral Processing & Admin Compliance',w:35,p:'foundational',measures:[
+        {m:'Referrals processed within 24hrs',t:'\u226595%',by:'CRM audit'},
+        {m:'Data accuracy on processed referrals',t:'\u226598%',by:'CRM audit'}
+      ]},
+      {n:'Outbound Prospecting & Meeting Generation',w:25,p:'tsunami',measures:[
+        {m:'Connected calls (>60s)/day',t:'\u226530',by:'CRM call log'},
+        {m:'Meetings booked for PMs/week',t:'\u226510',by:'Calendar / CRM meeting log'}
+      ]},
+      {n:'CRM Data Quality',w:20,p:'foundational',measures:[
+        {m:'CRM records updated within 24hrs',t:'Current; minimal incomplete fields',by:'CRM audit'}
+      ]},
+      {n:'Stakeholder Engagement',w:10,p:'both',measures:[
+        {m:'Internal handover satisfaction (Sales team)',t:'\u22654.0/5',by:'Monthly feedback'},
+        {m:'Referral handover SLA compliance',t:'\u226595%',by:'CRM tracking'}
+      ]},
+      {n:'Culture',w:10,p:'both',measures:[
+        {m:'Meeting attendance',t:'\u226595%',by:'Meeting records'},
+        {m:'Shift attendance',t:'\u226595%',by:'Attendance records'}
+      ]}
+    ]},
+  { id:'rmtl', name:'RM Team Leader', arch:3, parent:'gmbd', chain:'CGO \u2192 GM BD \u2192 RM Team Leader', code:'RMTL-L3', rev:65,
+    kpis:[
+      {n:'Team Retention & Referral Performance',w:50,p:'tsunami',measures:[
+        {m:'Team partner retention',t:'\u226595%',by:'Partner database'},
+        {m:'Team referral volumes',t:'\u22655% QoQ growth',by:'CRM reporting'},
+        {m:'Active partner ratio',t:'\u226580%',by:'Portfolio analysis'}
+      ]},
+      {n:'Activity & Partner Network',w:15,p:'tsunami',measures:[
+        {m:'Issue SLA compliance',t:'\u226590%',by:'Issue tracker'},
+        {m:'Churn risk flags',t:'\u22651/month identified',by:'Risk log'}
+      ]},
+      {n:'Foundational Delivery',w:15,p:'foundational',measures:[
+        {m:'Monthly coaching & pipeline review per direct report',t:'100%',by:'1:1 log'},
+        {m:'Quarterly account reviews per RM',t:'100% completed on time',by:'Review log'},
+        {m:'Team CRM compliance',t:'>=95%',by:'CRM audit'}
+      ]},
+      {n:'Partner & Team CSAT',w:10,p:'both',measures:[
+        {m:'Team NPS (partner)',t:'\u22659',by:'NPS survey'},
+        {m:'RM satisfaction',t:'\u22654.0/5',by:'Anonymous survey'}
+      ]},
+      {n:'Compliance & Culture',w:10,p:'both',measures:[
+        {m:'Joint initiatives with PM TL',t:'\u22651/quarter',by:'TL notes'},
+        {m:'Team attrition',t:'<=5%',by:'HR records'}
+      ]}
+    ]},
+  { id:'rm', name:'Relationship Manager', arch:1, parent:'rmtl', chain:'CGO \u2192 GM BD \u2192 RM TL \u2192 Relationship Manager', code:'RM-L2', rev:80,
+    kpis:[
+      {n:'Referral Volume & Growth',w:60,p:'tsunami',measures:[
+        {m:'Referrals from portfolio/month',t:'\u226550',by:'CRM reporting'},
+        {m:'QoQ referral growth',t:'\u22655%',by:'Portfolio analysis'},
+        {m:'Reactivations/month',t:'\u22653 dormant partners',by:'Activity log'}
+      ]},
+      {n:'Activity & Engagement',w:20,p:'tsunami',measures:[
+        {m:'Outbound calls (>60s) per day',t:'\u226520',by:'Aircall data'},
+        {m:'Connected time per day',t:'\u22652 hours',by:'CRM activity log'},
+        {m:'Partner check-ins/week',t:'\u226510',by:'Check-in log'},
+        {m:'Shift attendance',t:'\u226595%',by:'Attendance records'}
+      ]},
+      {n:'Partner Retention & CSAT',w:10,p:'both',measures:[
+        {m:'Partner retention rate',t:'100%',by:'Partner database'},
+        {m:'Partner NPS',t:'\u22659',by:'NPS survey'},
+        {m:'Quarterly check-ins completed',t:'100%',by:'Check-in log'}
+      ]},
+      {n:'Issue Resolution',w:5,p:'foundational',measures:[
+        {m:'Issue SLA compliance',t:'\u226448hrs',by:'Issue tracker'},
+        {m:'Escalation rate',t:'<10%',by:'Escalation log'}
+      ]},
+      {n:'Culture',w:5,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Meeting records'},
+        {m:'PM collaboration',t:'\u22651/month',by:'TL observation'}
+      ]}
+    ]},
+  { id:'plm', name:'Partnership Liaison Manager', arch:1, parent:'gmbd', chain:'CGO \u2192 GM BD \u2192 Partnership Liaison Manager', code:'PLM-L1', rev:80,
+    kpis:[
+      {n:'Coordinator Training & Onboarding',w:35,p:'tsunami',measures:[
+        {m:'New coordinator onboarding completion rate',t:'100% onboarded within 5 business days of activation',by:'CRM onboarding log'},
+        {m:'Coordinator training programme completion',t:'>=90% of active coordinators trained on referral process, systems, and compliance',by:'Training records / LMS'},
+        {m:'Coordinator referral quality (post-training)',t:'>=95% of referrals with complete and accurate data',by:'CRM referral audit'},
+        {m:'Coordinator retraining on quality failures',t:'100% retrained within 5 business days of quality flag',by:'Retraining log'}
+      ]},
+      {n:'Supplier Compliance & Standards',w:25,p:'foundational',measures:[
+        {m:'Supplier compliance rate',t:'>=95% of active suppliers meeting TC standards',by:'Compliance audit'},
+        {m:'Supplier onboarding documentation complete',t:'100% with signed agreements and verified credentials',by:'Supplier file audit'},
+        {m:'Supplier compliance reviews completed on schedule',t:'100% quarterly reviews on time',by:'Review log'},
+        {m:'Non-compliant supplier escalations',t:'100% escalated within 24hrs; resolution within 5 business days',by:'Escalation log'}
+      ]},
+      {n:'Referral Flow & Issue Resolution',w:20,p:'tsunami',measures:[
+        {m:'Referral SLA compliance',t:'100% processed within SLA',by:'CRM audit'},
+        {m:'Referral data completeness',t:'>=98%',by:'CRM audit'},
+        {m:'Issues resolved within 48hrs',t:'100%; zero unresolved >72hrs',by:'Issue tracker'},
+        {m:'Partner response time',t:'<4 hours',by:'CRM timestamp log'}
+      ]},
+      {n:'Partner CSAT & Engagement',w:10,p:'both',measures:[
+        {m:'Coordinator satisfaction with training and support',t:'>=4.0/5',by:'Post-training survey'},
+        {m:'Supplier satisfaction with onboarding process',t:'>=4.0/5',by:'Quarterly partner survey'},
+        {m:'Partner engagement touchpoints',t:'>=1 proactive check-in per coordinator per quarter',by:'CRM activity log'}
+      ]},
+      {n:'CRM, Data & Culture',w:10,p:'both',measures:[
+        {m:'CRM updated within 24hrs',t:'100%',by:'CRM audit'},
+        {m:'Training and compliance records current',t:'100% in system',by:'Records audit'},
+        {m:'Meeting attendance',t:'100%',by:'Meeting records'}
+      ]}
+    ]},
+
+  // ── MARKETING ──
+  { id:'gmm', name:'GM Marketing', arch:4, parent:'cgo', chain:'CGO \u2192 GM Marketing', code:'GMM-GM', rev:55,
+    kpis:[
+      {n:'Lead Generation & Revenue Contribution',w:40,p:'tsunami',measures:[
+        {m:'SQL volume vs budget',t:'Team to hit budget; 100% attributed to source',by:'CRM pipeline / attribution'},
+        {m:'Marketing contribution to new clients',t:'>=40% of all new clients',by:'CRM pipeline / attribution'},
+        {m:'ROAS',t:'>=8:1; CPL decreasing QoQ',by:'Google Ads / Meta analytics'},
+        {m:'CPQL and CPA',t:'Baselined and reducing by end Q4',by:'Attribution reporting / finance'},
+        {m:'Forecast accuracy (department)',t:'+/-5%',by:'Forecast vs actuals'}
+      ]},
+      {n:'Team Establishment & AI Capability',w:15,p:'foundational',measures:[
+        {m:'Marketing TOM implemented',t:'100% of roles at capability standards by Oct 2026',by:'Skills assessment against TOM role profiles'},
+        {m:'Right team in place',t:'All critical roles filled; capability gaps closed by end Q4',by:'HR records / hiring tracker'},
+        {m:'AI productivity uplift per FTE',t:'>=20% improvement in output per FTE by Oct 2026',by:'Quarterly AI assessment / efficiency report'},
+        {m:'AI adoption across marketing team',t:'75% adoption; 3 agents per member by end Q4',by:'Quarterly AI assessment'},
+        {m:'Internal agency service levels',t:'Cross-business comms delivery SLA >=90%; viewed as respected supplier',by:'SLA tracking / quarterly stakeholder survey'}
+      ]},
+      {n:'Brand, PR & Reputation',w:10,p:'both',measures:[
+        {m:'PR placements',t:'>=1/month',by:'Media tracking / PR log'},
+        {m:'Brand voice compliance',t:'100%',by:'Brand audit'},
+        {m:'Online reputation',t:'>=4.0 stars; >=20 reviews/month',by:'Review platform dashboards'}
+      ]},
+      {n:'Foundational Delivery',w:15,p:'foundational',measures:[
+        {m:'Pipeline & Lead Management',t:'Attribution >=90% attributed; CRO >=1 test/month; lifecycle nurture live, churn <5%',by:'Attribution reporting; CRO test log; platform reporting'},
+        {m:'Process, Playbooks & Capability',t:'Biz Basics embedded and operational by end Q4',by:'Initiative tracking / CGO review'},
+        {m:'CRM, Data & Systems',t:'MAP live with lead scoring/routing; comms platform operational; dashboards adopted',by:'Platform audit; platform reporting; dashboard audit'},
+        {m:'Performance Visibility & QA',t:'Website on new CMS; SEO foundations live; CRO A/B testing operational',by:'Launch confirmation; SEO audit; test results log'}
+      ]},
+      {n:'Leadership, CSAT & Culture',w:20,p:'both',measures:[
+        {m:'Marketing as respected internal supplier',t:'>=4.0/5',by:'Quarterly stakeholder survey (Sales, BD, Care)'},
+        {m:'Stakeholder CSAT (cross-functional)',t:'>=4.0/5',by:'Quarterly survey'},
+        {m:'Team engagement score',t:'>=4.0/5',by:'Quarterly pulse survey'},
+        {m:'Team attrition',t:'<=5% annualised',by:'HR records'}
+      ]}
+    ]},
+  { id:'hodm', name:'Head of Digital Marketing', arch:4, parent:'gmm', chain:'CGO \u2192 GM Marketing \u2192 Head of Digital Marketing', code:'HDM-L3', rev:80,
+    kpis:[
+      {n:'Digital Lead Volume & Paid Performance',w:40,p:'tsunami',measures:[
+        {m:'SQL lead volume vs target',t:'>=plan target',by:'CRM pipeline / GA4'},
+        {m:'Lead-to-deal conversion',t:'>=20%',by:'CRM pipeline reporting'},
+        {m:'ROAS',t:'>=8:1; CPL decreasing QoQ',by:'Google Ads / Meta analytics'},
+        {m:'Attribution accuracy',t:'>=90% attributed; Unknown/Other <15%',by:'Attribution reporting'},
+        {m:'CRO program',t:'>=1 test/month; conversion uplift >=5% QoQ',by:'CRO test log / GA4'}
+      ]},
+      {n:'Funnel Foundations & Infrastructure',w:20,p:'foundational',measures:[
+        {m:'Website live on new CMS',t:'Designed and embedded by end Q4; landing pages self-serving',by:'Launch confirmation'},
+        {m:'Landing page framework',t:'Designed and embedded by end Q4; templated for campaigns',by:'Page library / template audit'},
+        {m:'UTM and attribution framework',t:'Designed and embedded by end Q4; 100% campaigns tagged',by:'GA4 verification / attribution reporting'},
+        {m:'Klaviyo integration with CRM',t:'Designed and embedded by end Q4; lead flows live',by:'Platform reporting'},
+        {m:'Funnel mapping and reporting',t:'Designed and embedded by end Q4; full-funnel dashboard live',by:'Dashboard / GM confirmation'}
+      ]},
+      {n:'AI Execution & Competitive Intelligence',w:20,p:'foundational',measures:[
+        {m:'AI agents deployed for paid media, SEO, and CRO workflows',t:'>=3 operational by end Q4',by:'Agent deployment log'},
+        {m:'AI-assisted campaign production',t:'>=50% of campaigns using AI tooling',by:'Tool usage tracking'},
+        {m:'Competitor intelligence dashboard live',t:'Monthly reporting; keyword, ad, pricing, and services tracking',by:'Dashboard / report log'},
+        {m:'Competitor response playbook',t:'Documented and updated quarterly; fed into Sales playbook',by:'Playbook version log'},
+        {m:'Time savings from AI workflows',t:'>=25% across digital function',by:'Quarterly efficiency report'}
+      ]},
+      {n:'Stakeholder CSAT & Conversion Insights',w:10,p:'both',measures:[
+        {m:'Stakeholder CSAT (performance delivery)',t:'>=4.0/5',by:'Quarterly survey (Sales, BD, GM Marketing)'},
+        {m:'Funnel insights shared with Sales and BD',t:'Monthly; actionable conversion/channel data',by:'Meeting notes / report log'},
+        {m:'Campaign learnings documented and shared',t:'Post-campaign debrief within 5 days',by:'Campaign debrief log'}
+      ]},
+      {n:'Culture',w:10,p:'both',measures:[
+        {m:'Weekly 1:1 with direct report',t:'100%',by:'Meeting log'},
+        {m:'Campaigns delivered on brief and on time',t:'100%',by:'Marketing calendar / Asana'},
+        {m:'Campaign launch SLA',t:'<=5 business days from brief to live',by:'Asana timestamps'},
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'}
+      ]}
+    ]},
+  { id:'dml', name:'Digital Marketing Lead', arch:1, parent:'hodm', chain:'CGO \u2192 GM Marketing \u2192 HoDM \u2192 Digital Marketing Lead', code:'DML-L2', rev:80,
+    kpis:[
+      {n:'Paid Performance & ROAS',w:60,p:'tsunami',measures:[
+        {m:'SQL volume from paid channels',t:'>=plan target',by:'CRM pipeline / GA4'},
+        {m:'ROAS',t:'>=8:1; CPL decreasing QoQ',by:'Google Ads / Meta analytics'},
+        {m:'Campaign execution on time',t:'100%',by:'Marketing calendar'},
+        {m:'CRO tests running',t:'>=1/month with measurable uplift',by:'CRO test log / GA4'},
+        {m:'Audience segmentation and targeting',t:'Designed and embedded by end Q4; NDIS and Support at Home segments live',by:'Platform reporting'}
+      ]},
+      {n:'SEO & Organic Growth',w:15,p:'foundational',measures:[
+        {m:'Organic traffic',t:'>=5% MoM growth',by:'GA4'},
+        {m:'AI search visibility (GEO/AEO)',t:'TC in top 3 AI citations for priority terms; improving QoQ',by:'AI citation monitoring'},
+        {m:'Competitive benchmark',t:'TC in top 3 on priority keywords; quarterly gap analysis',by:'Ahrefs/Semrush + AI tracking'}
+      ]},
+      {n:'Tracking & Attribution',w:10,p:'foundational',measures:[
+        {m:'UTM compliance',t:'100%',by:'GA4 verification'},
+        {m:'Attribution coverage',t:'>=90% sales attributed to channel',by:'Attribution reporting'}
+      ]},
+      {n:'Productivity & Task Management',w:10,p:'both',measures:[
+        {m:'Asana discipline',t:'>=90%',by:'Asana reporting'},
+        {m:'Assets to Sales/BD',t:'>=1/month',by:'Project tracking'}
+      ]},
+      {n:'Culture',w:5,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'},
+        {m:'Stakeholder CSAT',t:'>=4.0/5',by:'Quarterly survey'}
+      ]}
+    ]},
+  { id:'cas', name:'Campaigns & Automation Specialist', arch:1, parent:'hodm', chain:'CGO \u2192 GM Marketing \u2192 HoDM \u2192 Campaigns & Automation Specialist', code:'CAS-L2', rev:80,
+    kpis:[
+      {n:'Speed to Lead & Sales Conversion',w:60,p:'tsunami',measures:[
+        {m:'Speed to lead (automated first contact)',t:'Within 1 hour; immediate Sales notification',by:'Automation platform timestamps'},
+        {m:'Lead-to-client conversion from nurture',t:'>=15%',by:'CRM funnel / automation reporting'},
+        {m:'SMS delivery and engagement',t:'>=95% delivery; response rate improving MoM',by:'SMS platform reporting'}
+      ]},
+      {n:'Campaign Cadence & Coverage',w:15,p:'tsunami',measures:[
+        {m:'Journey coverage',t:'>=1 automation per lifecycle stage; >=80% clients in journeys',by:'Journey tracking log'},
+        {m:'Email open rate',t:'>=40%; CTR >=15%',by:'Email platform reporting'},
+        {m:'A/B tests running',t:'>=2/month with documented learnings',by:'Test results log'}
+      ]},
+      {n:'AI & Automation Efficiency',w:10,p:'foundational',measures:[
+        {m:'AI-assisted content production',t:'>=50%',by:'Tool usage logging'},
+        {m:'Time savings from automation',t:'>=20%',by:'Hours tracking'},
+        {m:'New automation workflows delivered',t:'>=1/quarter',by:'Workflow documentation'}
+      ]},
+      {n:'Internal Service Levels',w:10,p:'both',measures:[
+        {m:'Cross-dept SLA compliance',t:'>=90%',by:'Request tracking log'},
+        {m:'Stakeholder CSAT (Growth + other departments)',t:'>=4.0/5',by:'Quarterly feedback survey'},
+        {m:'Conversion insights shared with Sales/BD',t:'>=1/month',by:'Meeting notes'}
+      ]},
+      {n:'Culture',w:5,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'},
+        {m:'Response to urgent requests',t:'Same-day turnaround',by:'Request log'}
+      ]}
+    ]},
+  { id:'sme', name:'Social Media Executive', arch:2, parent:'mc', chain:'CGO \u2192 GM Marketing \u2192 Marketing Coordinator \u2192 Social Media Executive', code:'SME-L1', rev:35,
+    kpis:[
+      {n:'Content Output & ORM',w:35,p:'tsunami',measures:[
+        {m:'Posts per platform/week',t:'>=5; >=50% AI-drafted; >=90% calendar adherence',by:'Social schedule / content log'},
+        {m:'Reviews generated',t:'>=20 new/month; same-day response (<=4hrs)',by:'Google Reviews / response log'},
+        {m:'Stars maintained',t:'>=4.0',by:'Review platform dashboards'}
+      ]},
+      {n:'Audience Growth & Engagement',w:20,p:'both',measures:[
+        {m:'Follower growth QoQ (LinkedIn + Facebook/Instagram)',t:'>=5%',by:'Platform analytics'},
+        {m:'Engagement rate',t:'>=3%',by:'Social analytics'}
+      ]},
+      {n:'AI Agents & Automation',w:15,p:'foundational',measures:[
+        {m:'AI agents per core function',t:'>=1',by:'Agent tracking'},
+        {m:'Time savings',t:'>=30%',by:'Hours tracking'},
+        {m:'New workflows/quarter',t:'>=1',by:'Workflow tracking'}
+      ]},
+      {n:'Brand Consistency & Stakeholder CSAT',w:20,p:'both',measures:[
+        {m:'Brand voice compliance across social',t:'100%',by:'Brand audit / GM review'},
+        {m:'Stakeholder CSAT',t:'>=4.0/5',by:'Quarterly survey'}
+      ]},
+      {n:'Culture',w:10,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'}
+      ]}
+    ]},
+  { id:'mom', name:'Marketing Operations Manager', arch:4, parent:'gmm', chain:'CGO \u2192 GM Marketing \u2192 Marketing Operations Manager', code:'MOM-L2', rev:30,
+    kpis:[
+      {n:'Internal Stakeholder Service & Delivery',w:30,p:'both',measures:[
+        {m:'Stakeholder CSAT',t:'>=4.0/5',by:'Quarterly survey'},
+        {m:'Briefs logged in Asana',t:'100%',by:'Asana audit'},
+        {m:'Cross-dept requests within SLA',t:'>=90%',by:'SLA tracking'},
+        {m:'Cross-functional delivery pipeline tracked and on-SLA',t:'100% of Sales/BD/Care requests visible in Asana; escalations before deadline',by:'Asana pipeline report / escalation log'},
+        {m:'Quarterly planning sessions with all departments',t:'Completed',by:'Meeting log'}
+      ]},
+      {n:'Asana Discipline & SLA',w:25,p:'both',measures:[
+        {m:'Asana utilisation',t:'100%',by:'Asana reporting'},
+        {m:'Tasks within SLA',t:'>=90%',by:'SLA tracking'},
+        {m:'Team Asana compliance',t:'>=90%',by:'Asana audit'},
+        {m:'Delays escalated before deadline',t:'100%',by:'Escalation log'}
+      ]},
+      {n:'Quality & QA',w:20,p:'foundational',measures:[
+        {m:'First-pass quality',t:'>=85%',by:'QA checklist'},
+        {m:'Error rate',t:'<2%',by:'Error log'},
+        {m:'Brand compliance',t:'>=95%',by:'Brand audit'}
+      ]},
+      {n:'AI & Process Automation',w:15,p:'foundational',measures:[
+        {m:'Automations delivered',t:'>=2/quarter',by:'Automation log'},
+        {m:'Time savings from automation',t:'>=20%',by:'Hours tracking'},
+        {m:'Process documentation current',t:'100%',by:'Version tracking'}
+      ]},
+      {n:'Reporting & Budget',w:10,p:'both',measures:[
+        {m:'Monthly KPI report',t:'On time',by:'Report date'},
+        {m:'Budget variance',t:'<=5%',by:'Budget tracking'},
+        {m:'Dashboards current',t:'100%',by:'Dashboard log'}
+      ]}
+    ]},
+  { id:'ce', name:'Communications Executive', arch:2, parent:'gmm', chain:'CGO \u2192 GM Marketing \u2192 Communications Executive', code:'CE-L2', rev:35,
+    kpis:[
+      {n:'ORM & Cross-Functional Support',w:30,p:'both',measures:[
+        {m:'Review/mention response',t:'Same-day; <1hr negative escalation',by:'Response log / escalation log'},
+        {m:'Cross-dept requests within SLA',t:'>=90%',by:'Request tracking'},
+        {m:'Stakeholder CSAT',t:'>=4.0/5',by:'Quarterly cross-functional survey'}
+      ]},
+      {n:'AI Content Production & Volume',w:25,p:'both',measures:[
+        {m:'Articles/month',t:'>=10; >=75% AI-drafted; >=3 formats where applicable',by:'CMS publishing log'},
+        {m:'Calendar adherence',t:'>=90%',by:'Calendar compliance tracking'},
+        {m:'AI workflow improvements',t:'>=1/quarter',by:'Workflow documentation'}
+      ]},
+      {n:'Content Quality & SEO',w:20,p:'foundational',measures:[
+        {m:'QA pass rate',t:'>=90%; zero factual errors',by:'Monthly content QA audit'},
+        {m:'SEO optimisation',t:'100% articles optimised; remediation <24hrs',by:'SEO checklist / remediation log'}
+      ]},
+      {n:'Internal Communications',w:15,p:'both',measures:[
+        {m:'Newsletter on schedule',t:'100%',by:'Newsletter delivery log'},
+        {m:'Stakeholder SLA compliance',t:'100%',by:'SLA tracking'}
+      ]},
+      {n:'Culture',w:10,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'},
+        {m:'Asana discipline',t:'>=90%',by:'Asana reporting'}
+      ]}
+    ]},
+  { id:'lgd', name:'Lead Graphic Designer', arch:2, parent:'gmm', chain:'CGO \u2192 GM Marketing \u2192 Lead Graphic Designer', code:'LGD-L2', rev:35,
+    kpis:[
+      {n:'Speed SLA & Delivery',w:30,p:'both',measures:[
+        {m:'SLA compliance',t:'100%; turnaround decreasing QoQ',by:'Request-to-delivery log'},
+        {m:'Revisions per project',t:'<=2',by:'Project tracking'},
+        {m:'First-pass on-brief',t:'>=90%',by:'Design request tracking'}
+      ]},
+      {n:'AI Design Efficiency',w:20,p:'foundational',measures:[
+        {m:'Routine tasks AI-assisted',t:'>=50%',by:'Tool usage log'},
+        {m:'Time savings',t:'>=25%',by:'Hours tracking'},
+        {m:'New AI workflows',t:'>=1/quarter',by:'Workflow tracking'}
+      ]},
+      {n:'Junior Development & SLA Performance',w:20,p:'both',measures:[
+        {m:'Junior SLA compliance',t:'>=95%',by:'Request-to-delivery log'},
+        {m:'Junior first-pass quality',t:'>=85% within 6 months',by:'Quality metrics'},
+        {m:'Weekly design reviews',t:'100%',by:'Review log'}
+      ]},
+      {n:'Creative Output',w:15,p:'both',measures:[
+        {m:'Quality score',t:'>=4.0/5',by:'Peer survey'},
+        {m:'Volume targets met',t:'100%',by:'Weekly output log'}
+      ]},
+      {n:'Stakeholder Engagement & Culture',w:15,p:'both',measures:[
+        {m:'Cross-functional stakeholder CSAT',t:'>=4.0/5',by:'Quarterly survey'},
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'},
+        {m:'Cross-dept design support',t:'>=2 assets to Sales/BD per month',by:'Project tracking'}
+      ]}
+    ]},
+  { id:'gd', name:'Graphic Designer', arch:2, parent:'lgd', chain:'CGO \u2192 GM Marketing \u2192 Lead GD \u2192 Graphic Designer', code:'GD-L1', rev:35,
+    kpis:[
+      {n:'Speed SLA & Delivery',w:30,p:'both',measures:[
+        {m:'SLA compliance',t:'100%',by:'Request-to-delivery log'},
+        {m:'Revisions per project',t:'<=2',by:'Project tracking'},
+        {m:'Weekly volume targets',t:'>=10 deliverables/week',by:'Weekly output log'}
+      ]},
+      {n:'AI Design Efficiency',w:20,p:'foundational',measures:[
+        {m:'Routine tasks AI-assisted',t:'>=40%',by:'Tool usage log'},
+        {m:'Time savings',t:'>=20%',by:'Hours tracking'},
+        {m:'Proficiency in AI tools',t:'>=2 tools',by:'Skills assessment'}
+      ]},
+      {n:'Cross-Functional Support & Volume',w:20,p:'both',measures:[
+        {m:'Cross-dept design requests within SLA',t:'>=90%',by:'Request tracking'},
+        {m:'Stakeholder CSAT',t:'>=4.0/5',by:'Quarterly survey'},
+        {m:'Weekly targets met',t:'100%',by:'Volume log'}
+      ]},
+      {n:'Creative Output',w:15,p:'both',measures:[
+        {m:'First-pass quality',t:'>=90%',by:'Design QA'},
+        {m:'Peer score',t:'>=4.0/5',by:'Team feedback survey'}
+      ]},
+      {n:'Stakeholder Engagement & Culture',w:15,p:'both',measures:[
+        {m:'Cross-functional stakeholder CSAT',t:'>=4.0/5',by:'Quarterly survey'},
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'}
+      ]}
+    ]},
+  { id:'eme', name:'Events Marketing Executive', arch:2, parent:'gmm', chain:'CGO \u2192 GM Marketing \u2192 Events Marketing Executive', code:'EME-L1', rev:35,
+    kpis:[
+      {n:'Event Delivery & Lead Generation',w:35,p:'tsunami',measures:[
+        {m:'Event ROMI',t:'>=3:1',by:'Event ROI tracking'},
+        {m:'Leads per event',t:'>=20 qualified leads per event',by:'Lead capture reporting'},
+        {m:'Webinar attendance rate',t:'>=50%',by:'Registration vs attendance'}
+      ]},
+      {n:'Event Operations & Budget',w:20,p:'both',measures:[
+        {m:'Logistics SLA',t:'100%',by:'Event delivery checklist'},
+        {m:'Budget variance',t:'<=5%',by:'Budget tracking'},
+        {m:'Vendor satisfaction',t:'>=4.0/5',by:'Vendor feedback'}
+      ]},
+      {n:'Post-Event Nurture & Follow-Up',w:15,p:'both',measures:[
+        {m:'Follow-up within 48hrs',t:'100%',by:'Follow-up log'},
+        {m:'Leads tracked through conversion',t:'All',by:'CRM conversion reporting'},
+        {m:'Survey response rate',t:'>=50%',by:'Survey tool'}
+      ]},
+      {n:'Pipeline & Cross-Functional Support',w:20,p:'both',measures:[
+        {m:'Quarterly event calendar',t:'On time',by:'Calendar submission'},
+        {m:'Stakeholder satisfaction',t:'>=4.0/5',by:'Feedback survey'}
+      ]},
+      {n:'Culture',w:10,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'},
+        {m:'Asana discipline',t:'>=90%',by:'Asana reporting'}
+      ]}
+    ]},
+  { id:'mc', name:'Marketing Coordinator', arch:2, parent:'gmm', chain:'CGO \u2192 GM Marketing \u2192 Marketing Coordinator', code:'MC-L1', rev:35,
+    kpis:[
+      {n:'Administrative Support & SLA',w:35,p:'both',measures:[
+        {m:'Tasks within SLA',t:'>=95%',by:'Task tracking log'},
+        {m:'Team satisfaction',t:'>=4.0/5',by:'Feedback survey'},
+        {m:'Calendar accuracy',t:'100%',by:'Calendar audit'}
+      ]},
+      {n:'Project Coordination & Accuracy',w:20,p:'both',measures:[
+        {m:'Asana task accuracy',t:'100%',by:'Asana audit'},
+        {m:'Overdue flags within 24hrs',t:'100%',by:'Flagging log'},
+        {m:'Meeting notes within 4hrs',t:'100%',by:'Notes completion log'}
+      ]},
+      {n:'Event Logistics Support',w:15,p:'both',measures:[
+        {m:'On-time coordination',t:'100%',by:'Event checklist'},
+        {m:'Material accuracy',t:'100%',by:'Event QA'},
+        {m:'Vendor tasks on time',t:'100%',by:'Task tracking'}
+      ]},
+      {n:'AI Tools & Cross-Functional Support',w:20,p:'foundational',measures:[
+        {m:'AI-assisted tasks',t:'>=3',by:'Tool usage log'},
+        {m:'Time savings',t:'>=15%',by:'Hours tracking'},
+        {m:'New AI tool adopted',t:'>=1/quarter',by:'Tool tracking'}
+      ]},
+      {n:'Culture',w:10,p:'both',measures:[
+        {m:'Meeting attendance',t:'100%',by:'Calendar log'},
+        {m:'Asana discipline',t:'>=90%',by:'Asana reporting'},
+        {m:'Stakeholder CSAT',t:'>=4.0/5',by:'Quarterly survey'}
+      ]}
+    ]},
+
+  // ══════════════════════════════════════════════════════════════
+  // MARKETING RESTRUCTURE — POST-TOM ROLES (Q1 FY27)
+  // Builder Model: 7 people + 30-40 AI agents
+  // Source: https://nickltrilogycare.github.io/marketing-tom/
+  // ══════════════════════════════════════════════════════════════
+
+  { id:'r_gmm', name:'GM Marketing (Restructure)', arch:4, parent:'cgo', chain:'CGO \u2192 GM Marketing', code:'R-GMM', rev:50, restructure:true, person:'Stephen Danckert',
+    kpis:[
+      {n:'Lead Generation & Revenue Contribution',w:45,p:'tsunami',measures:[
+        {m:'SQL volume vs budget',t:'Team to hit budget; 100% attributed to source',by:'CRM pipeline / attribution'},
+        {m:'Marketing contribution to new clients',t:'\u226540% of all new clients',by:'CRM pipeline / attribution'},
+        {m:'ROAS',t:'\u22658:1; CPL decreasing QoQ',by:'Google Ads / Meta analytics'},
+        {m:'CPQL and CPA',t:'Baselined and reducing QoQ',by:'Attribution reporting / finance'},
+        {m:'Forecast accuracy',t:'+/-5%',by:'Forecast vs actuals'},
+        {m:'Output volume vs pre-TOM baseline',t:'\u22653x across content, campaigns, and design',by:'Monthly output dashboard'}
+      ]},
+      {n:'Brand, PR & Reputation',w:15,p:'both',measures:[
+        {m:'PR placements',t:'\u22652/month',by:'Media tracking / PR log'},
+        {m:'Brand voice compliance',t:'100% across all channels and AI-generated content',by:'Brand audit'},
+        {m:'Online reputation',t:'\u22654.5 stars; \u226530 reviews/month',by:'Review platform dashboards'}
+      ]},
+      {n:'AI-First Operations & Output',w:20,p:'foundational',measures:[
+        {m:'AI agents in production',t:'\u226530 across all 5 roles',by:'Agent registry'},
+        {m:'AI-assisted execution',t:'\u226560% of total marketing execution AI-driven',by:'Quarterly AI assessment'},
+        {m:'Output per FTE',t:'\u22653x pre-TOM baseline',by:'Output/headcount ratio'},
+        {m:'Agent reliability',t:'\u226595% uptime; <5% error rate',by:'Monthly agent report'},
+        {m:'All 12 disciplines covered',t:'Zero gaps; all 12 disciplines actively owned',by:'Discipline coverage audit'}
+      ]},
+      {n:'Leadership, CSAT & Culture',w:20,p:'both',measures:[
+        {m:'Stakeholder CSAT (Sales, BD, Care)',t:'\u22654.0/5',by:'Quarterly stakeholder survey'},
+        {m:'Marketing as respected internal supplier',t:'\u22654.5/5',by:'Quarterly survey'},
+        {m:'Team engagement score',t:'\u22654.0/5',by:'Quarterly pulse survey'},
+        {m:'Team attrition',t:'0% (5-person team)',by:'HR records'},
+        {m:'AI adoption',t:'100% of team using \u22655 agents daily',by:'Quarterly AI assessment'}
+      ]}
+    ]},
+
+  { id:'r_hop', name:'Head of Performance (Restructure)', arch:4, parent:'r_gmm', chain:'CGO \u2192 GM Marketing \u2192 Head of Performance', code:'R-HOP', rev:50, restructure:true, person:'Paul Phare',
+    kpis:[
+      {n:'Lead Volume & Paid Performance',w:40,p:'tsunami',measures:[
+        {m:'SQL lead volume vs target',t:'\u2265plan target',by:'CRM pipeline / GA4'},
+        {m:'ROAS',t:'\u22658:1; CPL decreasing QoQ',by:'Google Ads / Meta analytics'},
+        {m:'Lead-to-deal conversion',t:'\u226520%',by:'CRM pipeline reporting'},
+        {m:'Attribution accuracy',t:'\u226595% attributed; Unknown/Other <10%',by:'Attribution reporting'},
+        {m:'Campaign volume',t:'\u22652x pre-TOM campaign output',by:'Campaign log'}
+      ]},
+      {n:'Full-Funnel Discipline Ownership',w:25,p:'both',measures:[
+        {m:'SEO: organic traffic growth',t:'\u22655% MoM',by:'GA4'},
+        {m:'SEO: AI search visibility',t:'TC in top 3 AI citations for priority terms',by:'AI citation monitoring'},
+        {m:'CRO: test cadence',t:'\u22652 tests/month; conversion uplift \u22655% QoQ',by:'CRO test log / GA4'},
+        {m:'Email: lifecycle coverage',t:'\u22651 automation per lifecycle stage; \u226580% clients in journeys',by:'Journey tracking'},
+        {m:'Email: open rate / CTR',t:'\u226540% open; \u226515% CTR',by:'Email platform reporting'},
+        {m:'Competitor intelligence',t:'Monthly report with actionable insights; \u22651 recommendation/month acted on',by:'Report log / GM review'}
+      ]},
+      {n:'AI Agent Effectiveness & Efficiency',w:15,p:'foundational',measures:[
+        {m:'Performance agents in production',t:'\u226510 (ads, SEO, CRO, email, competitor, reporting)',by:'Agent registry'},
+        {m:'Agent-assisted output',t:'\u226570% of campaign builds and reports AI-assisted',by:'Tool usage logging'},
+        {m:'Campaign launch speed',t:'\u22643 business days from brief to live',by:'Timestamps'},
+        {m:'Time savings',t:'\u226530% vs pre-TOM baseline',by:'Hours tracking'}
+      ]},
+      {n:'Stakeholder CSAT & Team Development',w:20,p:'both',measures:[
+        {m:'Stakeholder CSAT (Sales, BD)',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'Funnel insights to Sales and BD',t:'Monthly; actionable data',by:'Meeting notes / report log'},
+        {m:'Digital Lead development',t:'Performing across all execution disciplines; no SPOF risk',by:'Quarterly assessment'}
+      ]}
+    ]},
+
+  { id:'r_pb', name:'Performance Builder', arch:1, parent:'r_hop', chain:'CGO \u2192 GM Marketing \u2192 Head of Performance \u2192 Performance Builder', code:'R-PB', rev:75, restructure:true, person:'NEW HIRE',
+    kpis:[
+      {n:'Paid Performance & ROAS',w:30,p:'tsunami',measures:[
+        {m:'SQL volume from paid channels',t:'\u2265plan target',by:'CRM pipeline / GA4'},
+        {m:'ROAS',t:'\u22658:1; CPL decreasing QoQ',by:'Google Ads / Meta analytics'},
+        {m:'Campaign execution on time',t:'100%',by:'Marketing calendar'},
+        {m:'Ad creative variants',t:'\u22653 variants per campaign (AI-generated, human-approved)',by:'Creative log'},
+        {m:'Audience segmentation',t:'All key segments (NDIS, SaH, self-managed) live',by:'Platform reporting'}
+      ]},
+      {n:'Email, CRO & Automation Execution',w:25,p:'tsunami',measures:[
+        {m:'Speed to lead',t:'Within 1 hour automated first contact',by:'Automation timestamps'},
+        {m:'Email open rate / CTR',t:'\u226540% open; \u226515% CTR',by:'Email platform reporting'},
+        {m:'Lead-to-client conversion from nurture',t:'\u226515%',by:'CRM funnel'},
+        {m:'CRO tests',t:'\u22652/month with documented learnings',by:'CRO test log'},
+        {m:'A/B tests',t:'\u22652/month across email and landing pages',by:'Test results log'}
+      ]},
+      {n:'Web Dev & Attribution',w:20,p:'foundational',measures:[
+        {m:'Website management',t:'All landing pages and CMS updates via Claude Code',by:'Page library'},
+        {m:'Landing page turnaround',t:'\u22642 business days from brief to live',by:'Timestamps'},
+        {m:'UTM compliance',t:'100%',by:'GA4 verification'},
+        {m:'Attribution coverage',t:'\u226595% sales attributed to channel',by:'Attribution reporting'},
+        {m:'Full-funnel dashboard',t:'Live, accurate, updated weekly',by:'Dashboard audit'}
+      ]},
+      {n:'AI Efficiency & Stakeholder CSAT',w:25,p:'both',measures:[
+        {m:'AI agents in daily use',t:'\u22656 (ad copy, email, landing pages, CRO, reporting, UTM)',by:'Agent usage tracking'},
+        {m:'AI-assisted execution',t:'\u226570% of builds AI-drafted, human-approved',by:'Tool usage logging'},
+        {m:'Time savings',t:'\u226530% vs pre-TOM',by:'Hours tracking'},
+        {m:'Stakeholder CSAT',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'Asana discipline',t:'\u226590%',by:'Asana reporting'}
+      ]}
+    ]},
+
+  { id:'r_mom', name:'Marketing Ops Manager', arch:4, parent:'r_gmm', chain:'CGO \u2192 GM Marketing \u2192 Marketing Ops Manager', code:'R-MOM', rev:30, restructure:true, person:'NEW HIRE',
+    kpis:[
+      {n:'Internal Stakeholder Service & SLA',w:25,p:'both',measures:[
+        {m:'Cross-dept requests within SLA',t:'\u226595%',by:'SLA tracking'},
+        {m:'Stakeholder CSAT',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'Briefs logged in Asana',t:'100%; AI agent auto-logging',by:'Asana audit'},
+        {m:'Request turnaround time',t:'\u22642 business days standard; \u22644 hours urgent',by:'SLA tracking'},
+        {m:'Quarterly planning sessions with all departments',t:'Completed',by:'Meeting log'}
+      ]},
+      {n:'Content Strategy & Brand Governance',w:25,p:'both',measures:[
+        {m:'Editorial calendar',t:'Monthly calendar published; \u226595% adherence',by:'Calendar tracking'},
+        {m:'Content volume',t:'\u226515 articles/month (AI-drafted, human-QA)',by:'CMS publishing log'},
+        {m:'Content QA pass rate',t:'\u226595%; zero factual errors',by:'Monthly content QA audit'},
+        {m:'Brand voice compliance',t:'100% across all channels incl AI-generated',by:'Brand audit'},
+        {m:'PR placements',t:'\u22652/month',by:'PR log'},
+        {m:'Newsletter',t:'100% on schedule',by:'Delivery log'},
+        {m:'Internal comms',t:'All internal updates on schedule',by:'Comms log'}
+      ]},
+      {n:'Marketing Ops, Reporting & Events',w:20,p:'foundational',measures:[
+        {m:'Monthly KPI report',t:'On time, accurate, AI-assisted',by:'Report date'},
+        {m:'Budget variance',t:'\u22645%',by:'Budget tracking'},
+        {m:'Asana utilisation (team-wide)',t:'\u226595%',by:'Asana reporting'},
+        {m:'Dashboards current',t:'100%; auto-updated via AI agents',by:'Dashboard log'},
+        {m:'Event delivery (when required)',t:'On time, within budget, leads captured',by:'Event checklist'}
+      ]},
+      {n:'AI Operations & Output Multiplier',w:30,p:'foundational',measures:[
+        {m:'AI agents in production (ops + content)',t:'\u22658',by:'Agent registry'},
+        {m:'AI-assisted content output',t:'\u226575% of all content AI-drafted',by:'Tool usage logging'},
+        {m:'Output per FTE (MktOps side)',t:'\u22653x pre-TOM baseline',by:'Output comparison'},
+        {m:'Creative & Social Lead development',t:'Performing across design, social, content, ORM',by:'Quarterly assessment'},
+        {m:'Performance literacy',t:'Can interpret dashboards, brief Performance team',by:'GM Marketing assessment'}
+      ]}
+    ]},
+
+  { id:'r_ccb', name:'Content & Comms Builder', arch:2, parent:'r_mom', chain:'CGO \u2192 GM Marketing \u2192 Marketing Ops Manager \u2192 Content & Comms Builder', code:'R-CCB', rev:35, restructure:true, person:'Matthew Hart (ASSESS)',
+    kpis:[
+      {n:'Content Output & Quality',w:35,p:'tsunami',measures:[
+        {m:'Articles published',t:'\u226510/month',by:'CMS tracker'},
+        {m:'Newsletter',t:'100% on schedule',by:'Email platform'},
+        {m:'Content QA pass rate',t:'\u226595%; zero factual errors',by:'Monthly QA audit'},
+        {m:'AI-drafted content',t:'\u226570% first-draft AI',by:'Workflow audit'}
+      ]},
+      {n:'Communications & ORM',w:20,p:'both',measures:[
+        {m:'ORM response',t:'Same-day for negative reviews',by:'Review platform'},
+        {m:'Internal comms',t:'All updates on schedule',by:'Comms log'},
+        {m:'PR pitch support',t:'\u22652 pitches drafted/month (AI-assisted)',by:'PR log'}
+      ]},
+      {n:'Delivery Speed & AI Adoption',w:15,p:'foundational',measures:[
+        {m:'Content turnaround',t:'\u22642 business days standard',by:'Tracker'},
+        {m:'AI agents in daily use',t:'\u22654',by:'Agent usage tracking'},
+        {m:'Rework rate',t:'\u226410%',by:'QA review'}
+      ]},
+      {n:'Cross-Skilling (Social, Design)',w:20,p:'foundational',measures:[
+        {m:'Social copy (flex)',t:'\u22652/week when covering',by:'Social scheduler'},
+        {m:'Design assets (flex)',t:'Basic assets when covering',by:'Asset tracker'},
+        {m:'Cross-skill evidence',t:'Competent in \u22652 adjacent disciplines by month 4',by:'Skills assessment'}
+      ]},
+      {n:'CSAT & Collaboration',w:10,p:'both',measures:[
+        {m:'Stakeholder CSAT',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'Asana discipline',t:'\u226590%',by:'Asana reporting'}
+      ]}
+    ]},
+
+  { id:'r_sdb', name:'Social, ORM & Design Builder', arch:2, parent:'r_mom', chain:'CGO \u2192 GM Marketing \u2192 Marketing Ops Manager \u2192 Social, ORM & Design Builder', code:'R-SDB', rev:35, restructure:true, person:'Miranda Partridge (ASSESS)',
+    kpis:[
+      {n:'Social Media & ORM',w:35,p:'tsunami',measures:[
+        {m:'Posts per platform/week',t:'\u22655',by:'Social schedule'},
+        {m:'Reviews generated',t:'\u226520/month; same-day response',by:'Google Reviews / response log'},
+        {m:'Stars maintained',t:'\u22654.5',by:'Review platform dashboards'},
+        {m:'Engagement rate',t:'\u22653%',by:'Social analytics'}
+      ]},
+      {n:'Design & Visual Output',w:20,p:'both',measures:[
+        {m:'Design assets',t:'\u22655/week with AI assist',by:'Asset tracker'},
+        {m:'AI-assisted design',t:'\u226550%',by:'Workflow audit'},
+        {m:'Campaign asset turnaround',t:'\u22642 business days',by:'Timestamps'}
+      ]},
+      {n:'Content Writing (Cross-Skill)',w:15,p:'foundational',measures:[
+        {m:'Long-form content (flex)',t:'\u22652/month',by:'CMS'},
+        {m:'Social copy quality',t:'100% brand voice compliance',by:'Brand audit'}
+      ]},
+      {n:'Video Production',w:15,p:'foundational',measures:[
+        {m:'Video production',t:'\u22652/month',by:'Video tracker'},
+        {m:'Video turnaround',t:'\u22645 business days',by:'Timestamps'}
+      ]},
+      {n:'AI Adoption & CSAT',w:15,p:'both',measures:[
+        {m:'AI agents in daily use',t:'\u22654 (design, social, ORM, resize)',by:'Agent usage tracking'},
+        {m:'Stakeholder CSAT',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'90-day assessment',t:'Pass: design quality, video capability, content writing',by:'Assessment doc'}
+      ]}
+    ]},
+
+  { id:'r_ccab', name:'Creative & Campaign Builder', arch:2, parent:'r_mom', chain:'CGO \u2192 GM Marketing \u2192 Marketing Ops Manager \u2192 Creative & Campaign Builder', code:'R-CCAB', rev:35, restructure:true, person:'Alisha Van Bone (ASSESS)',
+    kpis:[
+      {n:'Creative Output & Brand',w:35,p:'both',measures:[
+        {m:'SLA compliance',t:'100%',by:'Request-to-delivery log'},
+        {m:'Revisions per project',t:'\u22642',by:'Project tracking'},
+        {m:'AI-assisted creative',t:'\u226550%',by:'Workflow audit'},
+        {m:'Brand governance',t:'Zero off-brand assets',by:'Brand audit'}
+      ]},
+      {n:'Campaign Execution',w:20,p:'tsunami',measures:[
+        {m:'Campaign assets on-time',t:'100%',by:'Campaign tracker'},
+        {m:'Cross-dept design support',t:'\u22654 assets to Sales/BD per month',by:'Project tracking'},
+        {m:'Campaign asset turnaround',t:'\u22642 business days',by:'Timestamps'}
+      ]},
+      {n:'Social Assets (Cross-Skill)',w:15,p:'both',measures:[
+        {m:'Social assets (flex)',t:'\u22653/week',by:'Social scheduler'},
+        {m:'Social copy support',t:'On-brand captions when covering',by:'Content log'}
+      ]},
+      {n:'Video Production',w:15,p:'foundational',measures:[
+        {m:'Video production',t:'\u22652/month',by:'Video tracker'},
+        {m:'Video turnaround',t:'\u22645 business days',by:'Timestamps'}
+      ]},
+      {n:'AI Adoption & CSAT',w:15,p:'both',measures:[
+        {m:'AI agents in daily use',t:'\u22654 (design, templates, resize, video)',by:'Agent usage tracking'},
+        {m:'Stakeholder CSAT',t:'\u22654.0/5',by:'Quarterly survey'},
+        {m:'90-day assessment',t:'Pass: speed, AI adoption, cross-format capability',by:'Assessment doc'}
+      ]}
+    ]},
+
+  { id:'r_ss', name:'Sales Support (Casual)', arch:5, parent:'r_gmm', chain:'CGO \u2192 GM Marketing \u2192 Sales Support', code:'R-SS', rev:35, restructure:true, person:'Casual',
+    kpis:[
+      {n:'Sales Enablement & Lead Support',w:40,p:'tsunami',measures:[
+        {m:'Leads processed and routed',t:'\u226595% within SLA',by:'CRM tracking'},
+        {m:'Data entry accuracy',t:'\u226598%',by:'CRM audit'},
+        {m:'Sales collateral requests fulfilled',t:'100% within SLA',by:'Request tracker'}
+      ]},
+      {n:'Campaign & Admin Support',w:25,p:'both',measures:[
+        {m:'Campaign admin tasks completed',t:'100% on-time',by:'Asana tracker'},
+        {m:'List building and segmentation support',t:'Delivered within 1 business day',by:'Request log'},
+        {m:'Event and webinar admin',t:'100% logistics completed on-time',by:'Event checklist'}
+      ]},
+      {n:'Reporting & Data Support',w:20,p:'foundational',measures:[
+        {m:'Weekly reporting inputs delivered',t:'100% on-time, accurate',by:'Report tracker'},
+        {m:'CRM hygiene tasks',t:'Completed weekly',by:'CRM audit'},
+        {m:'Dashboard data validation',t:'Zero errors flagged post-submission',by:'QA log'}
+      ]},
+      {n:'AI Adoption & Culture',w:15,p:'both',measures:[
+        {m:'AI tools used daily',t:'\u22652',by:'Usage tracking'},
+        {m:'Asana discipline',t:'\u226590%',by:'Asana reporting'},
+        {m:'Stakeholder feedback',t:'\u22654.0/5',by:'Quarterly survey'}
+      ]}
+    ]},
+
+  { id:'r_ail', name:'AI Innovation Lead (Further Scoping Required)', arch:1, parent:'cgo', chain:'CGO \u2192 AI Innovation Lead (Centre of Excellence)', code:'R-AIL', rev:75, restructure:true, person:'Imran Mehmood',
+    kpis:[
+      {n:'Agent Portfolio & Reliability',w:30,p:'foundational',measures:[
+        {m:'Total agents in production',t:'\u226530 across marketing team',by:'Agent registry'},
+        {m:'Agent uptime',t:'\u226597%',by:'Monthly uptime report'},
+        {m:'Agent error rate',t:'<3% requiring human correction',by:'Error tracking'},
+        {m:'Time-to-deploy (new agent)',t:'\u22641 week from requirement to production',by:'Deployment log'},
+        {m:'All agents documented',t:'100% with user guide, runbook, escalation path',by:'Documentation audit'},
+        {m:'Agent deprecation/refresh',t:'\u22652 agents improved or replaced per quarter',by:'Agent lifecycle log'}
+      ]},
+      {n:'Commercial Impact & Efficiency',w:30,p:'tsunami',measures:[
+        {m:'Quantified commercial impact ($)',t:'\u2265$750K annualised savings attributable to AI agents',by:'Quarterly impact report / CGO + CFO sign-off'},
+        {m:'Marketing output per FTE',t:'\u22653x pre-TOM baseline sustained',by:'Output/headcount ratio'},
+        {m:'Time saved across marketing team',t:'\u226540 hrs saved/month; documented',by:'Efficiency report'},
+        {m:'Cost per marketing output unit',t:'Decreasing QoQ',by:'Finance reporting'}
+      ]},
+      {n:'Team Enablement & Adoption',w:20,p:'both',measures:[
+        {m:'Marketing team agent usage',t:'100% of team using \u22655 agents daily',by:'Usage tracking'},
+        {m:'Team AI confidence score',t:'\u22654.5/5',by:'Quarterly capability assessment'},
+        {m:'Support request resolution',t:'Same-day turnaround',by:'Support log'},
+        {m:'Training for new/improved agents',t:'Within 1 week of deployment; \u226590% adoption within 2 weeks',by:'Training log / adoption tracking'}
+      ]},
+      {n:'Innovation Pipeline & Cross-Function',w:20,p:'both',measures:[
+        {m:'Cross-functional agents (Sales, BD, Care)',t:'\u22652 new agents outside marketing per quarter',by:'Agent deployment log'},
+        {m:'Tool evaluations',t:'\u22653/quarter with recommendation; \u22651 adopted',by:'Tool evaluation log'},
+        {m:'Innovation demos',t:'\u22651/month to marketing; \u22651/quarter to Growth team',by:'Demo log'},
+        {m:'Stakeholder CSAT',t:'\u22654.0/5 across all teams served',by:'Quarterly survey'}
+      ]}
+    ]},
+];
+
+// ── STATE ──
+const state = { view:'detail', selectedRole:null, archFilter:'all', progFilter:'all' };
+
+// ── INIT ──
+function init() {
+  renderArchFilters();
+  renderLegend();
+  renderTree();
+  renderCenter();
+}
+
+function renderArchFilters() {
+  const c = document.getElementById('arch-filters');
+  let h = '<div class="chip active" data-arch="all" onclick="filterArch(\'all\')">All</div>';
+  for (let i=1;i<=5;i++) h += `<div class="chip" data-arch="${i}" onclick="filterArch(${i})">${ARCH_NAMES[i]}</div>`;
+  c.innerHTML = h;
+}
+function renderLegend() {
+  const c = document.getElementById('legend');
+  let h = '';
+  for (let i=1;i<=5;i++) h += `<div class="legend-item"><div class="legend-dot" style="background:${ARCH_COLORS[i]}"></div>${ARCH_NAMES[i]}</div>`;
+  c.innerHTML = h;
+}
+
+function filterArch(v) {
+  state.archFilter = v;
+  document.querySelectorAll('#arch-filters .chip').forEach(c => c.classList.toggle('active', c.dataset.arch == v));
+  applyFilters();
+}
+function filterProg(v) {
+  state.progFilter = v;
+  document.querySelectorAll('#prog-filters .chip').forEach(c => c.classList.toggle('active', c.dataset.prog == v));
+  applyFilters();
+  if (state.selectedRole) renderDetail(state.selectedRole);
+}
+function applyFilters() {
+  document.querySelectorAll('.tree-node[data-id]').forEach(el => {
+    const r = roles.find(x => x.id === el.dataset.id);
+    if (!r) return;
+    let dim = false;
+    if (state.archFilter !== 'all' && r.arch != state.archFilter) dim = true;
+    if (state.progFilter !== 'all' && !r.kpis.some(k => k.p === state.progFilter || k.p === 'both')) dim = true;
+    el.classList.toggle('dimmed', dim);
+  });
+  document.querySelectorAll('.compare-card').forEach(el => {
+    const r = roles.find(x => x.id === el.dataset.id);
+    if (!r) return;
+    let dim = false;
+    if (state.archFilter !== 'all' && r.arch != state.archFilter) dim = true;
+    el.classList.toggle('dimmed', dim);
+  });
+}
+
+function renderTree() {
+  const c = document.getElementById('tree');
+  function build(pid) {
+    const ch = roles.filter(r => r.parent === pid);
+    if (!ch.length) return '';
+    let h = '<div class="tree-children">';
+    ch.forEach(r => {
+      h += `<div class="tree-node" data-id="${r.id}" onclick="selectRole('${r.id}')">
+        <div class="arch-dot" style="background:${ARCH_COLORS[r.arch]}"></div>
+        <span class="role-name" title="${r.name}">${r.name}</span>
+        <span class="arch-tag">${r.arch}</span>
+      </div>`;
+      h += build(r.id);
+    });
+    h += '</div>';
+    return h;
+  }
+  c.innerHTML = `<div class="tree-node" style="font-weight:700;color:var(--ltblue)">
+    <span class="role-name">CGO FY26 Objectives</span>
+  </div>` + build('cgo');
+}
+
+function selectRole(id) {
+  state.selectedRole = id;
+  document.querySelectorAll('.tree-node').forEach(el => el.classList.toggle('selected', el.dataset.id === id));
+  if (state.view === 'org') {
+    renderOrg(document.getElementById('center'));
+  } else {
+    if (state.view !== 'detail') switchView('detail');
+    else renderCascadeDetail(id);
+  }
+}
+
+function switchView(v) {
+  state.view = v;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
+  renderCenter();
+}
+
+function renderCenter() {
+  const c = document.getElementById('center');
+  if (state.view === 'org') renderOrg(c);
+  else if (state.view === 'detail') {
+    if (state.selectedRole) renderCascadeDetail(state.selectedRole);
+    else c.innerHTML = '<div class="detail-empty">Select a role from the tree to see the full cascade — selected role + all direct reports with KPI detail</div>';
+  } else if (state.view === 'compare') renderCompare(c);
+  else if (state.view === 'principles') renderPrinciples(c);
+}
+
+// Build a single role's KPI card HTML
+function buildRoleCard(r, isSelected) {
+  const totalMeasures = r.kpis.reduce((s, k) => s + k.measures.length, 0);
+
+  let barHtml = '';
+  r.kpis.forEach((k, i) => {
+    let op = 1;
+    if (state.progFilter !== 'all' && k.p !== state.progFilter && k.p !== 'both') op = 0.2;
+    const color = KPI_COLORS[i % KPI_COLORS.length];
+    barHtml += `<div class="seg" style="width:${k.w}%;background:${color};opacity:${op}" title="${k.n}: ${k.w}%">
+      <span class="seg-label">${k.w >= 15 ? k.n + ' ' + k.w + '%' : k.w + '%'}</span>
+    </div>`;
+  });
+
+  let sectionsHtml = '';
+  r.kpis.forEach((k, i) => {
+    const progLabel = k.p === 'tsunami' ? 'Tsunami' : k.p === 'foundational' ? 'Foundational' : 'Both';
+    const dimmed = state.progFilter !== 'all' && k.p !== state.progFilter && k.p !== 'both';
+    const color = KPI_COLORS[i % KPI_COLORS.length];
+    let measuresHtml = '';
+    if (k.measures && k.measures.length) {
+      measuresHtml = `<div class="measures"><table>
+        <tr><th>Measure</th><th>Target</th><th>Measured By</th></tr>`;
+      k.measures.forEach(ms => {
+        measuresHtml += `<tr>
+          <td class="measure-name">${ms.m}</td>
+          <td class="target">${ms.t}</td>
+          <td class="measured-by">${ms.by}</td>
+        </tr>`;
+      });
+      measuresHtml += '</table></div>';
+    }
+    sectionsHtml += `<div class="kpi-section${dimmed ? ' dimmed' : ''}" style="border-color:${color}">
+      <div class="kpi-section-header" style="background:${color}15">
+        <div class="kpi-title">
+          <div class="dot" style="background:${color}"></div>
+          KPI ${i+1}: ${k.n}
+          <span class="kpi-program ${k.p}">${progLabel}</span>
+        </div>
+        <div class="kpi-weight" style="color:${color}">${k.w}%</div>
+      </div>
+      ${measuresHtml}
+    </div>`;
+  });
+
+  return `<div class="cascade-role${isSelected ? ' is-selected' : ''}">
+    <div class="cr-header" onclick="selectRole('${r.id}')">
+      <div class="arch-dot" style="background:${ARCH_COLORS[r.arch]};width:10px;height:10px"></div>
+      <div class="cr-name">${r.name}</div>
+      <span class="arch-badge" style="background:${ARCH_COLORS[r.arch]};font-size:9px;padding:2px 8px">${ARCH_NAMES[r.arch]}</span>
+      <span class="rev-badge" style="font-size:9px;padding:2px 8px">Rev% ${r.rev || ''}%</span>
+      <div class="cr-meta">${r.code} &middot; ${r.kpis.length} KPIs &middot; ${totalMeasures} measures</div>
+    </div>
+    <div class="cr-body">
+      <div class="kpi-summary-bar">${barHtml}</div>
+      ${sectionsHtml}
+    </div>
+  </div>`;
+}
+
+// Get all descendants of a role (recursive)
+function getDescendants(parentId) {
+  const children = roles.filter(r => r.parent === parentId);
+  let result = [];
+  children.forEach(ch => {
+    result.push(ch);
+    result = result.concat(getDescendants(ch.id));
+  });
+  return result;
+}
+
+// Cascade Detail: selected role + all roles below in a waterfall
+function renderCascadeDetail(id) {
+  const r = roles.find(x => x.id === id);
+  if (!r) return;
+  const c = document.getElementById('center');
+  const descendants = getDescendants(id);
+
+  let html = '<div class="cascade-flow">';
+  // Selected role first
+  html += buildRoleCard(r, true);
+  // Then all descendants with connectors
+  descendants.forEach(d => {
+    html += '<div class="cascade-connector"></div>';
+    html += buildRoleCard(d, false);
+  });
+  html += '</div>';
+  c.innerHTML = html;
+
+  // Scroll to top
+  c.scrollTop = 0;
+}
+
+// Org Structure view
+function renderOrg(container) {
+  const deptGroups = [
+    { label: 'Full CGO Organisation', key: 'all' },
+    { label: 'Sales', key: 'sales' },
+    { label: 'Business Development', key: 'bd' },
+    { label: 'Marketing', key: 'mktg' },
+    { label: 'Direct to CGO', key: 'direct' },
+    { label: 'Mktg Restructure (Q1 FY27)', key: 'restructure' },
+  ];
+
+  if (!state.orgDept) state.orgDept = 'all';
+
+  function getOrgRoots() {
+    if (state.orgDept === 'all') return roles.filter(r => r.parent === 'cgo');
+    if (state.orgDept === 'sales') return roles.filter(r => r.id === 'gms');
+    if (state.orgDept === 'bd') return roles.filter(r => r.id === 'gmbd');
+    if (state.orgDept === 'mktg') return roles.filter(r => r.id === 'gmm');
+    if (state.orgDept === 'direct') return roles.filter(r => r.id === 'ail' || r.id === 'hcx');
+    if (state.orgDept === 'restructure') return roles.filter(r => r.restructure && r.parent === 'cgo');
+    return [];
+  }
+
+  function buildOrgBranch(role) {
+    const children = roles.filter(r => r.parent === role.id);
+    const hl = state.selectedRole === role.id ? ' highlighted' : '';
+    let html = `<div class="org-branch">
+      <div class="org-node${hl}" onclick="selectRole('${role.id}')" style="border-color:${ARCH_COLORS[role.arch]}40">
+        <div class="on-name">${role.name}</div>
+        <div class="on-arch" style="color:${ARCH_COLORS[role.arch]}">${ARCH_NAMES[role.arch]}</div>
+      </div>`;
+    if (children.length) {
+      html += '<div class="org-connector-v"></div><div class="org-level">';
+      children.forEach(ch => { html += buildOrgBranch(ch); });
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  let controlsHtml = '<div class="org-controls">';
+  deptGroups.forEach(g => {
+    controlsHtml += `<div class="org-btn${state.orgDept === g.key ? ' active' : ''}" onclick="state.orgDept='${g.key}';renderOrg(document.getElementById('center'))">${g.label}</div>`;
+  });
+  controlsHtml += '</div>';
+
+  const roots = getOrgRoots();
+  let orgHtml = '<div class="org-grid">';
+  // CGO root node
+  orgHtml += `<div class="org-node" style="border-color:var(--ltblue);background:var(--primary)">
+    <div class="on-name" style="color:#fff">CGO</div>
+    <div class="on-arch" style="color:var(--ltblue)">Nick Lunn</div>
+  </div><div class="org-connector-v"></div><div class="org-level">`;
+  roots.forEach(r => { orgHtml += buildOrgBranch(r); });
+  orgHtml += '</div></div>';
+
+  container.innerHTML = controlsHtml + orgHtml;
+}
+
+function renderCompare(container) {
+  const groups = [
+    {label:'Direct to CGO', ids:['ail','hcx']},
+    {label:'Sales', ids:['gms','stl','ssr','sr','sso','cec','csrs']},
+    {label:'Business Development', ids:['gmbd','pmtl','spm','pm','apm','rmtl','rm','plm']},
+    {label:'Marketing', ids:['gmm','hodm','dml','cas','sme','mom','ce','lgd','gd','eme','mc']},
+    {label:'Mktg Restructure (Q1 FY27)', ids:['r_gmm','r_hop','r_pb','r_mom','r_ccb','r_sdb','r_ccab','r_ss','r_ail']},
+  ];
+  let h = '';
+  groups.forEach(g => {
+    h += `<div class="dept-label">${g.label}</div><div class="compare-grid">`;
+    g.ids.forEach(id => {
+      const r = roles.find(x => x.id === id);
+      const mc = r.kpis.reduce((s,k) => s + k.measures.length, 0);
+      h += `<div class="compare-card" data-id="${id}" onclick="selectRole('${id}')">
+        <div class="cc-name"><div class="cc-dot" style="background:${ARCH_COLORS[r.arch]}"></div>${r.name} <span style="color:var(--text-dim);font-weight:400;font-size:10px">(${r.kpis.length} KPIs, ${mc} measures)</span></div>
+        <div class="stacked-bar">`;
+      r.kpis.forEach((k,i) => {
+        let op = 1;
+        if (state.progFilter !== 'all' && k.p !== state.progFilter && k.p !== 'both') op = 0.15;
+        const color = KPI_COLORS[i % KPI_COLORS.length];
+        h += `<div class="seg" style="width:${k.w}%;background:${color};opacity:${op}" title="${k.n}: ${k.w}%">${k.w>10?k.w+'%':''}</div>`;
+      });
+      h += `</div><div class="compare-legend">`;
+      r.kpis.forEach((k,i) => {
+        const color = KPI_COLORS[i % KPI_COLORS.length];
+        h += `<span style="background:${color}"></span>${k.n} (${k.w}%)<br>`;
+      });
+      h += '</div></div>';
+    });
+    h += '</div>';
+  });
+  container.innerHTML = h;
+  applyFilters();
+}
+
+function renderPrinciples(container) {
+  container.innerHTML = `<div class="principles">
+
+    <h3 style="color:var(--ltblue);font-size:20px;margin-bottom:4px;">Why This Model Exists</h3>
+    <p>We're in a once-in-a-generation market window. 83,000 new Support at Home packages launched November 2025, creating a tsunami of demand. That window closes as competitors catch up \u2014 likely by mid-FY27. Every KPI in this cascade is designed to answer one question: <strong style="color:var(--ltblue)">are we converting this opportunity into durable market share before the window shuts?</strong></p>
+
+    <h3 style="margin-top:28px;">The Strategic Tension</h3>
+    <p style="color:var(--text-dim)">We have to run two conflicting programs at the same time. Most organisations do one or the other. We're doing both because we don't have the luxury of sequencing them.</p>
+    <table class="rev-table"><tr><th>Program</th><th>Focus</th><th>Why It Can't Wait</th></tr>
+    <tr><td><span style="color:var(--tsunami);font-weight:700">Tsunami</span></td><td style="color:var(--text-dim)">Capture market share NOW \u2014 conversions, speed to lead, pipeline intensity</td><td style="color:var(--text-dim)">Packages are already declining ~28%. Every month of delay = clients going to competitors permanently</td></tr>
+    <tr><td><span style="color:var(--foundational);font-weight:700">Foundational</span></td><td style="color:var(--text-dim)">Fix broken things \u2014 website, CRM, attribution, AI adoption, team capability</td><td style="color:var(--text-dim)">Without foundations, we can't scale when competition arrives. We'd be spending more to acquire clients we can't retain</td></tr></table>
+
+    <h3 style="margin-top:28px;">How the Cascade Works</h3>
+    <p style="color:var(--text-dim)">Every role in this cascade traces back to a Growth budget number. The weight tells you what percentage of someone's performance rating comes from each area. The closer you are to the client, the more weight sits on revenue outcomes.</p>
+
+    <h3>Design Decisions (and Why)</h3>
+    <ol>
+      <li><strong>Revenue is king.</strong> Outcome KPIs weighted highest. Closer to the action = higher revenue weight. This isn't a philosophical choice \u2014 it's because our business model only works if we grow. A sales rep who is culturally perfect but misses target is a problem. Weights reflect that.</li>
+      <li><strong>Lead indicators are weighted, not just tracked.</strong> Activity and pipeline aren't "nice to have" \u2014 they're how you diagnose and coach before it's too late. A rep with low activity in week 2 will miss target in week 4. By weighting activity, we create early intervention points.</li>
+      <li><strong>CSAT is mandatory on every role.</strong> Not just leaders. Every revenue-carrying person has a CSAT measure because retention starts at first contact. If the onboarding experience is poor, we lose clients before they generate a single dollar of platform fees.</li>
+      <li><strong>Foundations sit with leaders, not frontline.</strong> Leaders carry team capability, AI adoption, and systems KPIs. Frontline carries execution. This prevents the "too many priorities" trap where a sales rep is expected to hit target AND build a CRM workflow AND adopt 5 new tools.</li>
+      <li><strong>MktOps owns the plumbing.</strong> Attribution, reporting, SLA tracking sits in one place. Not duplicated across roles. This was a deliberate choice to avoid the "everyone thinks someone else is measuring it" problem.</li>
+      <li><strong>4-5 KPI areas per role, always summing to 100%.</strong> Forces prioritisation. If everything is a priority, nothing is. The weight distribution IS the strategy for that role.</li>
+      <li><strong>Every KPI is tagged Tsunami or Foundational.</strong> This lets us filter the entire cascade by program. If we need to check "are we doing enough on foundations?" \u2014 one click shows every foundational KPI across all 28 roles.</li>
+    </ol>
+
+    <h3 style="margin-top:28px;">Revenue Weight by Level</h3>
+    <p style="color:var(--text-dim)">The weight gradient is intentional. Frontline carries 80% revenue weight because that's their job. GMs carry 65% because they also own team capability and culture. Functional roles (Marketing, MktOps) carry 50% because they're enabling revenue, not closing it directly.</p>
+    <table class="rev-table"><tr><th>Level</th><th>Rev%</th><th>Pattern</th><th>Rationale</th></tr>
+    <tr><td>Frontline Revenue</td><td style="color:var(--arch1);font-weight:700">80%</td><td style="color:var(--text-dim)">60/20/10-15/5/5</td><td style="color:var(--text-dim)">Execution-focused. Hit the number.</td></tr>
+    <tr><td>Team Leaders</td><td style="color:var(--arch3);font-weight:700">65-70%</td><td style="color:var(--text-dim)">Varies by role</td><td style="color:var(--text-dim)">Own the team's number + build capability</td></tr>
+    <tr><td>GMs (Revenue)</td><td style="color:var(--arch3);font-weight:700">65%</td><td style="color:var(--text-dim)">40-50/15/10-15/15/20</td><td style="color:var(--text-dim)">Department P&L + retention + foundations</td></tr>
+    <tr><td>GMs (Functional)</td><td style="color:var(--arch4);font-weight:700">50%</td><td style="color:var(--text-dim)">40-45/15-25/15-20/20</td><td style="color:var(--text-dim)">Enable revenue; own infrastructure</td></tr>
+    <tr><td>Brand & Creative</td><td style="color:var(--arch2);font-weight:700">~55%</td><td style="color:var(--text-dim)">30-35/20-25/15-20/15-20/10-15</td><td style="color:var(--text-dim)">Output quality + speed + cross-skilling</td></tr></table>
+
+    <h3 style="margin-top:28px;">5 Role Archetypes</h3>
+    <p style="color:var(--text-dim)">Every role in the cascade is assigned an archetype. This isn't just a label \u2014 it determines the KPI structure, weighting pattern, and number of measures. It also makes it easy to compare "like for like" across departments.</p>
+    <table class="rev-table"><tr><th>Archetype</th><th>Roles</th><th>Purpose</th></tr>
+    <tr><td><span style="color:var(--arch1);font-weight:700">1. Revenue Driver</span></td><td>12 roles</td><td style="color:var(--text-dim)">Frontline revenue. Sales reps, partnership managers, digital lead. Up to 3 measures per KPI.</td></tr>
+    <tr><td><span style="color:var(--arch2);font-weight:700">2. Brand & Creative</span></td><td>6 roles</td><td style="color:var(--text-dim)">Marketing execution. Content, design, social, events. Output quality + speed.</td></tr>
+    <tr><td><span style="color:var(--arch3);font-weight:700">3. Revenue Leadership</span></td><td>5 roles</td><td style="color:var(--text-dim)">Team leaders. Own the team's number + develop people. Up to 5 measures.</td></tr>
+    <tr><td><span style="color:var(--arch4);font-weight:700">4. Functional Leadership</span></td><td>4 roles</td><td style="color:var(--text-dim)">Enable revenue. Marketing, MktOps, Digital. Infrastructure + team capability.</td></tr>
+    <tr><td><span style="color:var(--arch5);font-weight:700">5. Pipeline Support</span></td><td>1 role</td><td style="color:var(--text-dim)">Non-revenue-carrying. Referral processing, prospecting, admin.</td></tr></table>
+
+    <h3 style="margin-top:28px;">H2 FY26 Growth Targets</h3>
+    <p style="color:var(--text-dim)">These are the enterprise-level outcomes that every KPI in the cascade ultimately serves. Each one maps to specific roles and measures throughout the tree.</p>
+    <table class="rev-table"><tr><th>Metric</th><th>Current</th><th>Target</th><th>Why This Target</th></tr>
+    <tr><td>New client acquisitions</td><td style="color:var(--text-dim)">~1,000/month gross</td><td style="color:var(--arch1)">Above 1,200/month gross</td><td style="color:var(--text-dim)">Market is shrinking ~28%. Growing volume = gaining share</td></tr>
+    <tr><td>Speed to lead</td><td style="color:var(--text-dim)">24 hours</td><td style="color:var(--arch1)">Under 5 minutes</td><td style="color:var(--text-dim)">Industry research: 5-min response = 8x conversion vs 30-min</td></tr>
+    <tr><td>Pre-onboarding churn</td><td style="color:var(--text-dim)">~10%</td><td style="color:var(--arch1)">7% by Dec 2026</td><td style="color:var(--text-dim)">Every 1% reduction = ~120 clients/year saved</td></tr>
+    <tr><td>In-service churn</td><td style="color:var(--text-dim)">TBD</td><td style="color:var(--arch1)">\u22642.4%/month</td><td style="color:var(--text-dim)">Industry benchmark. Above this = net client loss</td></tr>
+    <tr><td>Attribution Unknown/Other</td><td style="color:var(--text-dim)">High</td><td style="color:var(--arch1)">Below 15%</td><td style="color:var(--text-dim)">Can't optimise spend without knowing what works</td></tr>
+    <tr><td>AI adoption (Marketing)</td><td style="color:var(--text-dim)">Low</td><td style="color:var(--arch1)">75%; 3+ agents/person</td><td style="color:var(--text-dim)">Enables restructure: 7 people doing what 12 did</td></tr>
+    <tr><td>AI commercial impact</td><td style="color:var(--text-dim)">Unmeasured</td><td style="color:var(--arch1)">\u2265$500K annualised</td><td style="color:var(--text-dim)">Must prove ROI to justify AI investment and headcount model</td></tr>
+    <tr><td>CPQL / CPA</td><td style="color:var(--text-dim)">Unmeasured</td><td style="color:var(--arch1)">Baselined and tracked</td><td style="color:var(--text-dim)">Foundation for all channel mix and budget decisions</td></tr></table>
+
+    <h3 style="margin-top:28px;">Marketing Restructure \u2014 The Builder Model (Q1 FY27)</h3>
+    <p style="color:var(--text-dim)">The current KPIs are based on a 12-person specialist model. The restructure moves to a 7-person builder model where AI handles 70% of execution and humans apply judgment on the 30% requiring strategy, voice, empathy, and nuance.</p>
+    <table class="rev-table"><tr><th>Dimension</th><th>Current (12 people)</th><th>Restructure (7 + AI)</th></tr>
+    <tr><td>Headcount</td><td style="color:var(--text-dim)">12 + CGO</td><td style="color:var(--arch1)">7 + Imran + CGO</td></tr>
+    <tr><td>Model</td><td style="color:var(--text-dim)">Specialist silos, 4-5 handoffs/campaign</td><td style="color:var(--arch1)">Pi-shaped builders, 2 pods, 1-2 handoffs</td></tr>
+    <tr><td>AI Agents</td><td style="color:var(--text-dim)">Ad hoc, low adoption</td><td style="color:var(--arch1)">30-40 agents, 70% execution</td></tr>
+    <tr><td>Output per FTE</td><td style="color:var(--text-dim)">1x</td><td style="color:var(--arch1)">2-3x</td></tr>
+    <tr><td>Disciplines covered</td><td style="color:var(--text-dim)">7 of 12 (5 gaps)</td><td style="color:var(--arch1)">12 of 12 (zero gaps)</td></tr>
+    <tr><td>Cost</td><td style="color:var(--text-dim)">Current run rate</td><td style="color:var(--arch1)">$500K annualised savings</td></tr></table>
+    <p style="color:var(--text-dim);margin-top:8px;"><strong style="color:var(--ltblue)">View the restructure KPIs:</strong> Switch to the <em>Org Structure</em> or <em>Compare</em> tab and select "Mktg Restructure (Q1 FY27)" to see the post-TOM role KPIs side by side with current.</p>
+    <p style="color:var(--text-dim)"><strong style="color:var(--ltblue)">Source:</strong> <a href="https://nickltrilogycare.github.io/marketing-tom/" style="color:var(--ltblue)">Marketing Target Operating Model</a></p>
+
+    <h3 style="margin-top:28px;">How to Read This Cascade</h3>
+    <ol>
+      <li><strong>Start with Org Structure.</strong> See who reports to whom and the archetype of each role.</li>
+      <li><strong>Click any role in the tree.</strong> The cascade view shows that role + all direct reports with full KPI detail.</li>
+      <li><strong>Use Compare.</strong> Side-by-side view of all roles in a department. Spot weight imbalances or missing dimensions.</li>
+      <li><strong>Filter by program.</strong> Toggle Tsunami/Foundational to see where effort is concentrated.</li>
+      <li><strong>Filter by archetype.</strong> Compare "like for like" across departments (e.g. all Revenue Drivers).</li>
+    </ol>
+
+  </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
