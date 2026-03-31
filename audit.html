@@ -840,7 +840,7 @@ loadRecs(); updatePrompt();
 </div>
 
 <script>
-const HASH='1d0fab7e4fc1fb41e4ec9d77b68e33e5f4baf2e8396aa92d55e0bbf1e0c1a95a';
+const HASH='cbfad02f9ed2a8d1e08d8f74f5303e9eb93637d47f82ab6f1c15871cf8dd0481';
 async function sha256(s){const d=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',d);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function checkPw(){const v=document.getElementById('pw-input').value;const h=await sha256(v);if(h===HASH){document.getElementById('pw-gate').classList.add('hidden');document.getElementById('app-content').style.display='block';sessionStorage.setItem('tc-kpi-audit-auth','1')}else{document.getElementById('pw-err').textContent='Incorrect code';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus()}}
 document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw()});
