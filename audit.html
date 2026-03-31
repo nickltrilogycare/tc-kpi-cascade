@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPI Alignment Audit — Trilogy Care</title>
+<style>
+
+  #pw-gate{position:fixed;inset:0;z-index:9999;background:#0f1419;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}
+  #pw-gate.hidden{display:none}
+  #pw-gate h2{color:#e4e8ec;font-size:18px;font-weight:600}
+  #pw-gate .pw-sub{color:#8a9bb0;font-size:13px;margin-top:-8px}
+  #pw-gate input{padding:10px 16px;border-radius:8px;border:1px solid #2a3a4e;background:#1a2332;color:#e4e8ec;font-size:16px;text-align:center;width:200px;letter-spacing:4px;outline:none}
+  #pw-gate input:focus{border-color:#64BCEA}
+  #pw-gate .pw-err{color:#e74c3c;font-size:13px;min-height:20px}
+  #pw-gate button{padding:8px 24px;border-radius:8px;border:none;background:#007F7E;color:#fff;font-size:14px;cursor:pointer;font-weight:600}
+  #pw-gate button:hover{background:#009a99}
+  #pw-gate .pw-logo{font-size:28px;font-weight:800;color:#64BCEA;margin-bottom:8px}
+  #app-content{display:none}
+
+
+  :root {
+    --tc-blue: #2c4c79;
+    --tc-teal: #007F7E;
+    --tc-light-blue: #64BCEA;
+    --tc-light-teal: #43C0BE;
+    --bg: #0f1419;
+    --bg-card: #1a2332;
+    --bg-card-hover: #1e2a3d;
+    --bg-header: #162030;
+    --border: #2a3a4e;
+    --text: #e4e8ec;
+    --text-muted: #8a9bb0;
+    --text-dim: #5a6b7e;
+    --high: #e74c3c;
+    --high-bg: rgba(231,76,60,0.12);
+    --medium: #f39c12;
+    --medium-bg: rgba(243,156,18,0.12);
+    --low: #27ae60;
+    --low-bg: rgba(39,174,96,0.12);
+    --aligned: #27ae60;
+    --gap: #e74c3c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5; }
+
+  /* Header */
+  .header { background:linear-gradient(135deg,var(--tc-blue) 0%,#1a3050 100%); padding:24px 32px; border-bottom:2px solid var(--tc-teal); }
+  .header-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  .header h1 { font-size:22px; font-weight:700; color:#fff; letter-spacing:-0.5px; }
+  .header h1 span { color:var(--tc-light-teal); }
+  .header-meta { font-size:12px; color:var(--text-muted); margin-top:4px; }
+  .header-actions { display:flex; gap:8px; align-items:center; }
+  .btn { padding:6px 14px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg-card); color:var(--text); transition:all .15s; }
+  .btn:hover { background:var(--bg-card-hover); border-color:var(--tc-teal); }
+  .btn-primary { background:var(--tc-teal); border-color:var(--tc-teal); color:#fff; }
+  .btn-primary:hover { background:#009a99; }
+  .btn-sm { padding:4px 10px; font-size:11px; }
+
+  /* Executive Summary Banner */
+  .exec-summary {
+    background:linear-gradient(90deg,rgba(0,127,126,.15) 0%,rgba(44,76,121,.15) 100%);
+    border-bottom:1px solid var(--border); padding:16px 32px;
+  }
+  .exec-summary-inner { max-width:1400px; margin:0 auto; display:flex; gap:24px; align-items:flex-start; }
+  .exec-summary-tldr { flex:1; }
+  .exec-summary-tldr h2 { font-size:14px; font-weight:700; color:var(--tc-light-teal); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+  .exec-summary-tldr p { font-size:13px; color:var(--text); line-height:1.7; }
+  .exec-summary-tldr strong { color:var(--high); }
+  .exec-summary-verdict { min-width:220px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:14px 18px; }
+  .verdict-label { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+  .verdict-score { font-size:36px; font-weight:800; color:var(--medium); }
+  .verdict-text { font-size:11px; color:var(--text-muted); margin-top:2px; }
+
+  /* Stats Bar */
+  .stats-bar { display:flex; gap:12px; padding:14px 32px; background:var(--bg-header); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .stat-card { flex:1; min-width:100px; padding:10px 14px; background:var(--bg-card); border-radius:8px; border:1px solid var(--border); text-align:center; }
+  .stat-value { font-size:24px; font-weight:800; color:var(--tc-light-blue); }
+  .stat-value.critical { color:var(--high); }
+  .stat-value.aligned { color:var(--aligned); }
+  .stat-label { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+
+  /* Tabs */
+  .tab-bar { display:flex; gap:2px; padding:0 32px; background:var(--bg-header); border-bottom:1px solid var(--border); overflow-x:auto; }
+  .tab { padding:10px 14px; font-size:12px; font-weight:600; cursor:pointer; color:var(--text-muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all .15s; position:relative; }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:var(--tc-light-teal); border-bottom-color:var(--tc-teal); }
+  .tab .badge { display:inline-block; padding:1px 6px; border-radius:8px; font-size:10px; font-weight:700; margin-left:4px; }
+  .tab .tab-key { position:absolute; top:2px; right:4px; font-size:9px; color:var(--text-dim); font-weight:400; }
+  .badge-high { background:var(--high-bg); color:var(--high); }
+  .badge-medium { background:var(--medium-bg); color:var(--medium); }
+  .badge-low { background:var(--low-bg); color:var(--low); }
+
+  /* Content */
+  .content { padding:24px 32px; max-width:1400px; margin:0 auto; }
+  .section { display:none; }
+  .section.active { display:block; animation:fadeIn .2s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+  .section-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; flex-wrap:wrap; gap:8px; }
+  .section-title { font-size:18px; font-weight:700; }
+  .section-desc { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+  .severity-tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-left:8px; vertical-align:middle; }
+  .severity-high { background:var(--high-bg); color:var(--high); }
+  .severity-medium { background:var(--medium-bg); color:var(--medium); }
+  .severity-low { background:var(--low-bg); color:var(--low); }
+
+  /* Tables */
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px; }
+  thead th { background:var(--bg-header); color:var(--text-muted); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; padding:10px 12px; text-align:left; border-bottom:2px solid var(--border); position:sticky; top:0; cursor:pointer; user-select:none; }
+  thead th:hover { color:var(--tc-light-teal); }
+  thead th .sort-arrow { font-size:10px; margin-left:4px; opacity:.4; }
+  thead th.sorted .sort-arrow { opacity:1; color:var(--tc-light-teal); }
+  tbody td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  tbody tr:hover { background:var(--bg-card-hover); }
+  .gap-cell { color:var(--high); font-weight:600; }
+  .ok-cell { color:var(--aligned); }
+  .warn-cell { color:var(--medium); }
+  .mono { font-family:'SF Mono',Menlo,Monaco,monospace; font-size:12px; }
+  .small-text { font-size:11px; color:var(--text-muted); }
+
+  /* Weight bar */
+  .weight-bar { display:flex; height:22px; border-radius:4px; overflow:hidden; width:100%; min-width:160px; position:relative; }
+  .weight-seg { display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff; cursor:help; position:relative; }
+  .weight-seg:hover { filter:brightness(1.3); }
+  .ws-1 { background:#2c4c79; }
+  .ws-2 { background:#007F7E; }
+  .ws-3 { background:#64BCEA; color:#1a2332; }
+  .ws-4 { background:#43C0BE; color:#1a2332; }
+  .ws-5 { background:#5a6b7e; }
+  .weight-legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; font-size:10px; color:var(--text-muted); }
+  .weight-legend-item { display:flex; align-items:center; gap:4px; }
+  .weight-legend-dot { width:10px; height:10px; border-radius:2px; }
+
+  /* Comparison grid */
+  .compare-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; margin-bottom:20px; }
+  .compare-card { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:16px; }
+  .compare-card h4 { font-size:13px; font-weight:700; margin-bottom:8px; color:var(--tc-light-teal); }
+  .compare-item { display:flex; justify-content:space-between; font-size:12px; padding:4px 0; border-bottom:1px solid rgba(42,58,78,.5); gap:8px; }
+  .compare-item:last-child { border-bottom:none; }
+
+  /* Heatmap */
+  .heatmap-grid { display:grid; grid-template-columns:180px repeat(8,1fr); gap:1px; background:var(--border); border-radius:8px; overflow:hidden; margin-bottom:20px; font-size:11px; }
+  .heatmap-cell { background:var(--bg-card); padding:8px 6px; text-align:center; }
+  .heatmap-header { background:var(--bg-header); font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; font-size:10px; }
+  .heatmap-row-label { text-align:left; font-weight:600; padding-left:12px; display:flex; align-items:center; }
+  .hm-high { background:rgba(231,76,60,.2); color:var(--high); font-weight:700; }
+  .hm-medium { background:rgba(243,156,18,.15); color:var(--medium); font-weight:600; }
+  .hm-low { background:rgba(39,174,96,.1); color:var(--low); }
+  .hm-none { background:var(--bg-card); color:var(--text-dim); }
+  .hm-ok { background:rgba(39,174,96,.08); color:var(--aligned); }
+
+  /* Before/After */
+  .before-after { display:grid; grid-template-columns:1fr auto 1fr; gap:0; margin-bottom:20px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+  .ba-col { padding:16px; }
+  .ba-before { background:rgba(231,76,60,.06); }
+  .ba-arrow { display:flex; align-items:center; justify-content:center; background:var(--bg-header); padding:0 16px; font-size:24px; color:var(--tc-teal); }
+  .ba-after { background:rgba(39,174,96,.06); }
+  .ba-col h4 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+  .ba-before h4 { color:var(--high); }
+  .ba-after h4 { color:var(--aligned); }
+  .ba-item { font-size:12px; padding:4px 0; color:var(--text-muted); }
+
+  /* Recommendation Cards */
+  .rec-list { display:flex; flex-direction:column; gap:12px; }
+  .rec-card { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:16px 20px; display:flex; gap:16px; align-items:flex-start; transition:all .15s; }
+  .rec-card:hover { border-color:var(--tc-teal); }
+  .rec-card.checked { opacity:.45; border-left:3px solid var(--aligned); }
+  .rec-check { width:22px; height:22px; min-width:22px; border-radius:6px; border:2px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; transition:all .15s; margin-top:2px; }
+  .rec-check:hover { border-color:var(--tc-teal); }
+  .rec-check.done { background:var(--tc-teal); border-color:var(--tc-teal); color:#fff; }
+  .rec-num { font-size:14px; font-weight:800; color:var(--tc-light-blue); min-width:24px; margin-top:1px; }
+  .rec-body { flex:1; }
+  .rec-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+  .rec-desc { font-size:12px; color:var(--text-muted); line-height:1.6; }
+  .rec-meta { display:flex; gap:12px; margin-top:8px; flex-wrap:wrap; align-items:center; }
+  .rec-tags { display:flex; gap:6px; flex-wrap:wrap; }
+  .rec-tag { font-size:10px; padding:2px 8px; border-radius:4px; background:rgba(100,188,234,.1); color:var(--tc-light-blue); font-weight:600; }
+  .rec-owner { font-size:11px; color:var(--tc-light-teal); font-weight:700; border:1px solid var(--tc-teal); padding:2px 10px; border-radius:12px; }
+
+  /* Filters */
+  .filters { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .filter-chip { padding:5px 12px; border-radius:16px; font-size:11px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted); transition:all .15s; }
+  .filter-chip:hover { border-color:var(--tc-teal); color:var(--text); }
+  .filter-chip.active { background:var(--tc-teal); border-color:var(--tc-teal); color:#fff; }
+
+  /* Quick Wins */
+  .quick-wins { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+  .qw-column h3 { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid var(--border); }
+  .qw-column.immediate h3 { color:var(--aligned); border-color:var(--aligned); }
+  .qw-column.consult h3 { color:var(--medium); border-color:var(--medium); }
+  .qw-item { font-size:12px; padding:10px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; margin-bottom:8px; line-height:1.6; }
+  .qw-item strong { color:var(--tc-light-teal); }
+  .qw-owner { font-size:10px; color:var(--text-dim); margin-top:4px; }
+
+  /* Prompt/Copy */
+  .prompt-section { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin-top:24px; }
+  .prompt-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .prompt-header h3 { font-size:14px; font-weight:700; }
+  .prompt-content { font-family:'SF Mono',Menlo,Monaco,monospace; font-size:12px; line-height:1.8; color:var(--text-muted); white-space:pre-wrap; max-height:300px; overflow-y:auto; }
+  .copied-feedback { position:fixed; top:20px; right:20px; background:var(--tc-teal); color:#fff; padding:10px 20px; border-radius:8px; font-size:13px; font-weight:600; opacity:0; transition:opacity .3s; pointer-events:none; z-index:999; }
+  .copied-feedback.show { opacity:1; }
+
+  /* Key insight callout */
+  .callout { background:var(--bg-card); border-left:3px solid var(--tc-teal); border-radius:0 8px 8px 0; padding:14px 18px; margin-bottom:16px; }
+  .callout-warn { border-left-color:var(--medium); }
+  .callout-danger { border-left-color:var(--high); }
+  .callout h4 { font-size:12px; font-weight:700; margin-bottom:4px; }
+  .callout p { font-size:12px; color:var(--text-muted); line-height:1.6; }
+
+  /* Keyboard hint */
+  .kb-hint { position:fixed; bottom:16px; right:16px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:11px; color:var(--text-dim); z-index:100; }
+  .kb-hint kbd { background:var(--bg-header); border:1px solid var(--border); border-radius:3px; padding:1px 5px; font-family:inherit; font-size:10px; }
+
+  /* Progress bar */
+  .progress-bar { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:6px; }
+  .progress-fill { height:100%; background:var(--tc-teal); border-radius:2px; transition:width .3s; }
+
+  /* Print */
+  @media print {
+    body { background:#fff; color:#222; font-size:11px; }
+    .header { background:#2c4c79!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .tab-bar,.kb-hint,.header-actions,.exec-summary-verdict { display:none; }
+    .section { display:block!important; page-break-inside:avoid; margin-bottom:20px; padding-top:12px; border-top:1px solid #ccc; }
+    .exec-summary { background:#f0f4f8!important; -webkit-print-color-adjust:exact; }
+    table { font-size:9px; }
+    .heatmap-grid { font-size:8px; }
+    .rec-check { border:1px solid #999; width:14px; height:14px; min-width:14px; }
+    .stat-card { border:1px solid #ddd; }
+    .stat-value { color:#2c4c79!important; }
+  }
+  @media (max-width:768px) {
+    .content,.stats-bar,.header,.exec-summary { padding-left:16px; padding-right:16px; }
+    .tab-bar { padding:0 16px; }
+    .quick-wins { grid-template-columns:1fr; }
+    .heatmap-grid { font-size:9px; overflow-x:auto; }
+    .before-after { grid-template-columns:1fr; }
+    .ba-arrow { padding:8px; transform:rotate(90deg); }
+    .exec-summary-inner { flex-direction:column; }
+    .kb-hint { display:none; }
+  }
+
+</style>
+</head>
+<body>
+
+<div id="pw-gate">
+  <div class="pw-logo">TC</div>
+  <h2>KPI Alignment Audit</h2>
+  <div class="pw-sub">Enter access code to continue</div>
+  <input type="password" id="pw-input" maxlength="8" placeholder="&#8226;&#8226;&#8226;&#8226;" autofocus>
+  <div class="pw-err" id="pw-err"></div>
+  <button onclick="checkPw()">Unlock</button>
+</div>
+
+<div id="app-content">
+
+
+<div class="copied-feedback" id="copiedFeedback">Copied to clipboard</div>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>KPI Alignment Audit <span>— Trilogy Care</span></h1>
+      <div class="header-meta">Executive Review &middot; 158 Roles &middot; 8 Departments &middot; 31 March 2026 &middot; <span id="progressText">0/8 actions complete</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-sm" onclick="shareTab()">Share Tab Link</button>
+      <button class="btn" onclick="window.print()">Print Report</button>
+      <button class="btn btn-primary" onclick="copyPrompt()">Copy Action Plan</button>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
+</div>
+
+<div class="exec-summary">
+  <div class="exec-summary-inner">
+    <div class="exec-summary-tldr">
+      <h2>TL;DR for Exec Team</h2>
+      <p>We reviewed every KPI across all 158 roles. The good news: STI structure, performance splits, and cross-functional CSAT are already aligned. The problem: <strong>we're measuring the same things on different scales</strong> — CSAT uses three different scales, engagement uses four different metrics, and call activity uses different definitions across departments. CCO has the most gaps (missing STI, values assessment, and inconsistent CSAT). Only CGO has a proper cascade document. 4 quick wins can be done this week; 4 larger items need exec consultation.</p>
+    </div>
+    <div class="exec-summary-verdict">
+      <div class="verdict-label">Alignment Score</div>
+      <div class="verdict-score">62%</div>
+      <div class="verdict-text">Structure is solid. Measurement language needs standardisation.</div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="stat-value">158</div><div class="stat-label">Roles Reviewed</div></div>
+  <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">Departments</div></div>
+  <div class="stat-card"><div class="stat-value critical">3</div><div class="stat-label">Critical Issues</div></div>
+  <div class="stat-card"><div class="stat-value critical">5</div><div class="stat-label">Medium Issues</div></div>
+  <div class="stat-card"><div class="stat-value aligned">2</div><div class="stat-label">Already Aligned</div></div>
+  <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">Actions</div></div>
+</div>
+
+<div class="tab-bar" id="tabBar">
+  <div class="tab active" data-tab="overview">Overview<span class="tab-key">1</span></div>
+  <div class="tab" data-tab="heatmap">Responsibility<span class="tab-key">2</span></div>
+  <div class="tab" data-tab="csat">CSAT Scales <span class="badge badge-high">HIGH</span><span class="tab-key">3</span></div>
+  <div class="tab" data-tab="calls">Call Activity <span class="badge badge-medium">MED</span><span class="tab-key">4</span></div>
+  <div class="tab" data-tab="engagement">Engagement <span class="badge badge-medium">MED</span><span class="tab-key">5</span></div>
+  <div class="tab" data-tab="frameworks">Frameworks <span class="badge badge-medium">MED</span><span class="tab-key">6</span></div>
+  <div class="tab" data-tab="attrition">Attrition <span class="badge badge-low">LOW</span><span class="tab-key">7</span></div>
+  <div class="tab" data-tab="leadership">Leadership Wt<span class="tab-key">8</span></div>
+  <div class="tab" data-tab="gaps">Gaps <span class="badge badge-high">3</span><span class="tab-key">9</span></div>
+  <div class="tab" data-tab="actions">Action Plan<span class="tab-key">0</span></div>
+</div>
+
+<div class="content" id="content">
+
+  <!-- TAB: Overview -->
+  <div class="section active" id="sec-overview">
+    <div class="section-header">
+      <h2 class="section-title">Executive Scorecard Comparison</h2>
+    </div>
+    <p class="section-desc">All 8 C-Suite KPIs side-by-side. Hover weight bars for KPI area names. Click column headers to sort.</p>
+
+    <table id="execTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable('execTable',0)">Role <span class="sort-arrow">&#9660;</span></th>
+          <th onclick="sortTable('execTable',1)">Incumbent <span class="sort-arrow">&#9660;</span></th>
+          <th>KPI Categories</th>
+          <th>Weight Distribution</th>
+          <th onclick="sortTable('execTable',4)">KPIs <span class="sort-arrow">&#9660;</span></th>
+          <th onclick="sortTable('execTable',5)">CSAT Qs <span class="sort-arrow">&#9660;</span></th>
+          <th>Perf Split</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>CEO</strong></td><td>Luke Traini</td>
+          <td class="small-text">Financial &middot; Growth &middot; People/AI &middot; Strategy &middot; Governance</td>
+          <td><div class="weight-bar"><div class="weight-seg ws-1" style="width:30%" title="Financial Performance 30%">30</div><div class="weight-seg ws-2" style="width:25%" title="Growth & Client Strategy 25%">25</div><div class="weight-seg ws-3" style="width:20%" title="People, Culture & AI 20%">20</div><div class="weight-seg ws-4" style="width:15%" title="Strategy & Leadership 15%">15</div><div class="weight-seg ws-5" style="width:10%" title="Governance & Risk 10%">10</div></div></td>
+          <td class="mono">5 areas / 26</td>
+          <td class="gap-cell">0 &mdash; GAP</td>
+          <td class="small-text">Co 40 + Ind 60</td>
+        </tr>
+        <tr>
+          <td><strong>CFO</strong></td><td>Marko Rukavina</td>
+          <td class="small-text">Leadership &middot; Financial Strategy &middot; Tech-Enabled Ops &middot; Business Partnership</td>
+          <td><div class="weight-bar"><div class="weight-seg ws-1" style="width:50%" title="Leadership, Culture & Capability 50%">50</div><div class="weight-seg ws-2" style="width:20%" title="Financial Strategy 20%">20</div><div class="weight-seg ws-3" style="width:20%" title="Tech-Enabled Finance 20%">20</div><div class="weight-seg ws-4" style="width:10%" title="Business Partnership 10%">10</div></div></td>
+          <td class="mono">4 areas / 19</td>
+          <td class="mono">8 <span class="small-text">(5+3)</span></td>
+          <td class="small-text">Co 30 + BU 20 + Ind 50</td>
+        </tr>
+        <tr>
+          <td><strong>CGO</strong></td><td>Nick Lunn</td>
+          <td class="small-text">Sales/Revenue &middot; Retention &middot; Utilisation &middot; Marketing &middot; Leadership</td>
+          <td><div class="weight-bar"><div class="weight-seg ws-1" style="width:30%" title="Sales & Revenue Growth 30%">30</div><div class="weight-seg ws-2" style="width:20%" title="Retention & Churn 20%">20</div><div class="weight-seg ws-3" style="width:15%" title="Utilisation & Platform Fee 15%">15</div><div class="weight-seg ws-4" style="width:20%" title="Marketing Performance 20%">20</div><div class="weight-seg ws-5" style="width:15%" title="Leadership & Culture 15%">15</div></div></td>
+          <td class="mono">5 areas / 25</td>
+          <td class="mono">9 <span class="small-text">(5+4)</span></td>
+          <td class="small-text">Co 30 + BU 20 + Ind 50</td>
+        </tr>
+        <tr>
+          <td><strong>CIO</strong></td><td>Mike Wise</td>
+          <td class="small-text">Platform &middot; AI Multiplier &middot; Data &middot; Trust &middot; Leadership</td>
+          <td><div class="weight-bar"><div class="weight-seg ws-1" style="width:30%" title="Platform & Application Delivery 30%">30</div><div class="weight-seg ws-2" style="width:25%" title="AI as Force Multiplier 25%">25</div><div class="weight-seg ws-3" style="width:20%" title="Data Readiness 20%">20</div><div class="weight-seg ws-4" style="width:15%" title="Trust & Resilience 15%">15</div><div class="weight-seg ws-5" style="width:10%" title="Leadership & Culture 10%">10</div></div></td>
+          <td class="mono">5 areas / 24</td>
+          <td class="mono">8 <span class="small-text">(4+4)</span></td>
+          <td class="small-text">Co 30 + BU 20 + Ind 50</td>
+        </tr>
+        <tr>
+          <td><strong>COS</strong></td><td>Jody Webb</td>
+          <td class="small-text">Cultural Impact &middot; Client/Staff Exp &middot; AI Programs &middot; Exec Enablement</td>
+          <td><div class="weight-bar"><div class="weight-seg ws-1" style="width:40%" title="Cultural Impact & Engagement 40%">40</div><div class="weight-seg ws-2" style="width:25%" title="Client & Staff Experience 25%">25</div><div class="weight-seg ws-3" style="width:20%" title="AI Program Ops 20%">20</div><div class="weight-seg ws-4" style="width:15%" title="Exec Enablement 15%">15</div></div></td>
+          <td class="mono">4 areas / 20</td>
+          <td class="mono">9 <span class="small-text">(5+4)</span></td>
+          <td class="small-text">Co 30 + BU 20 + Ind 50</td>
+        </tr>
+        <tr>
+          <td><strong>COO-Care</strong></td><td>Patrick Hawker</td>
+          <td class="small-text">Ops/Client Exp &middot; Composable Workday &middot; Leadership &middot; Clinical &middot; Care Plans</td>
+          <td><div class="weight-bar"><div class="weight-seg ws-1" style="width:30%" title="Operational Performance 30%">30</div><div class="weight-seg ws-2" style="width:25%" title="Composable Workday & AI 25%">25</div><div class="weight-seg ws-3" style="width:20%" title="Leadership & Culture 20%">20</div><div class="weight-seg ws-4" style="width:15%" title="Clinical Governance 15%">15</div><div class="weight-seg ws-5" style="width:10%" title="Care Plan Completeness 10%">10</div></div></td>
+          <td class="mono">5 areas / 26</td>
+          <td class="mono">8 <span class="small-text">(4+4)</span></td>
+          <td class="small-text">Co 30 + BU 20 + Ind 50</td>
+        </tr>
+        <tr>
+          <td><strong>COO-QA</strong></td><td>Erin Headley</td>
+          <td class="small-text">Regulatory &middot; Supply Chain &middot; Quality Gov &middot; Incidents &middot; Leadership</td>
+          <td><div class="weight-bar"><div class="weight-seg ws-1" style="width:30%" title="Regulatory Compliance 30%">30</div><div class="weight-seg ws-2" style="width:25%" title="Supply Chain Integrity 25%">25</div><div class="weight-seg ws-3" style="width:20%" title="Quality Governance 20%">20</div><div class="weight-seg ws-4" style="width:10%" title="Incidents & SIRS 10%">10</div><div class="weight-seg ws-5" style="width:15%" title="Leadership & Culture 15%">15</div></div></td>
+          <td class="mono">5 areas / 24</td>
+          <td class="mono">8 <span class="small-text">(4+4)</span></td>
+          <td class="small-text">Co 30 + BU 20 + Ind 50</td>
+        </tr>
+        <tr>
+          <td><strong>SA/CPO</strong></td><td>William Whitelaw</td>
+          <td class="small-text">Product Strategy &middot; Tech/AI &middot; Advisory &middot; Leadership &middot; External Intel</td>
+          <td><div class="weight-bar"><div class="weight-seg ws-1" style="width:30%" title="Product Strategy & Roadmap 30%">30</div><div class="weight-seg ws-2" style="width:30%" title="Tech Commercialisation & AI 30%">30</div><div class="weight-seg ws-3" style="width:15%" title="Strategic Advisory 15%">15</div><div class="weight-seg ws-4" style="width:15%" title="Leadership & Culture 15%">15</div><div class="weight-seg ws-5" style="width:10%" title="External Intelligence 10%">10</div></div></td>
+          <td class="mono">5 areas / 18</td>
+          <td class="mono">8 <span class="small-text">(5+3)</span></td>
+          <td class="small-text">Co 30 + BU 20 + Ind 50</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="weight-legend">
+      <span class="weight-legend-item"><span class="weight-legend-dot" style="background:#2c4c79"></span> KPI 1 (Primary)</span>
+      <span class="weight-legend-item"><span class="weight-legend-dot" style="background:#007F7E"></span> KPI 2</span>
+      <span class="weight-legend-item"><span class="weight-legend-dot" style="background:#64BCEA"></span> KPI 3</span>
+      <span class="weight-legend-item"><span class="weight-legend-dot" style="background:#43C0BE"></span> KPI 4</span>
+      <span class="weight-legend-item"><span class="weight-legend-dot" style="background:#5a6b7e"></span> KPI 5</span>
+      <span style="color:var(--text-dim); font-size:10px; margin-left:8px;">Hover bars for KPI area names</span>
+    </div>
+
+    <div class="callout" style="margin-top:16px;">
+      <h4>Key Observations</h4>
+      <p>
+        <strong style="color:var(--high)">CEO has zero CSAT questions</strong> &mdash; only exec without a structured 360 section.<br>
+        <strong style="color:var(--medium)">CFO Leadership at 50%</strong> &mdash; justified by TOM transition, should rebalance post-transition.<br>
+        <strong style="color:var(--aligned)">STI universally 20% at L5</strong> &mdash; well aligned. <strong style="color:var(--aligned)">Performance split consistent</strong> &mdash; CEO 40/60, all others 30/20/50.
+      </p>
+    </div>
+  </div>
+
+  <!-- TAB: Heatmap -->
+  <div class="section" id="sec-heatmap">
+    <h2 class="section-title">Department Responsibility Heatmap</h2>
+    <p class="section-desc">Each exec can see their homework at a glance. Cells show severity of action needed per finding per department.</p>
+
+    <div class="heatmap-grid">
+      <div class="heatmap-cell heatmap-header">Finding</div>
+      <div class="heatmap-cell heatmap-header">CEO</div>
+      <div class="heatmap-cell heatmap-header">CFO</div>
+      <div class="heatmap-cell heatmap-header">CGO</div>
+      <div class="heatmap-cell heatmap-header">CIO</div>
+      <div class="heatmap-cell heatmap-header">COS</div>
+      <div class="heatmap-cell heatmap-header">COO-C</div>
+      <div class="heatmap-cell heatmap-header">COO-Q</div>
+      <div class="heatmap-cell heatmap-header">SA/CPO</div>
+
+      <div class="heatmap-cell heatmap-row-label">CSAT Scale</div>
+      <div class="heatmap-cell hm-high">FIX</div>
+      <div class="heatmap-cell hm-high">FIX</div>
+      <div class="heatmap-cell hm-ok">OK</div>
+      <div class="heatmap-cell hm-high">FIX</div>
+      <div class="heatmap-cell hm-ok">OK</div>
+      <div class="heatmap-cell hm-high">FIX</div>
+      <div class="heatmap-cell hm-high">FIX</div>
+      <div class="heatmap-cell hm-high">FIX</div>
+
+      <div class="heatmap-cell heatmap-row-label">CEO CSAT Gap</div>
+      <div class="heatmap-cell hm-high">ADD</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+
+      <div class="heatmap-cell heatmap-row-label">CCO Completeness</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-high">OWN</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+
+      <div class="heatmap-cell heatmap-row-label">Engagement Metric</div>
+      <div class="heatmap-cell hm-medium">UPDATE</div>
+      <div class="heatmap-cell hm-medium">UPDATE</div>
+      <div class="heatmap-cell hm-medium">UPDATE</div>
+      <div class="heatmap-cell hm-medium">UPDATE</div>
+      <div class="heatmap-cell hm-medium">UPDATE</div>
+      <div class="heatmap-cell hm-medium">UPDATE</div>
+      <div class="heatmap-cell hm-medium">UPDATE</div>
+      <div class="heatmap-cell hm-medium">UPDATE</div>
+
+      <div class="heatmap-cell heatmap-row-label">Call Metrics</div>
+      <div class="heatmap-cell hm-medium">ADD</div>
+      <div class="heatmap-cell hm-low">ADD</div>
+      <div class="heatmap-cell hm-medium">ADD</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-medium">ADD</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+
+      <div class="heatmap-cell heatmap-row-label">Cascade Document</div>
+      <div class="heatmap-cell hm-medium">CREATE</div>
+      <div class="heatmap-cell hm-medium">CREATE</div>
+      <div class="heatmap-cell hm-ok">DONE</div>
+      <div class="heatmap-cell hm-medium">CREATE</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-medium">CREATE</div>
+      <div class="heatmap-cell hm-medium">CREATE</div>
+      <div class="heatmap-cell hm-medium">CREATE</div>
+
+      <div class="heatmap-cell heatmap-row-label">Attrition Targets</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-low">FIX</div>
+      <div class="heatmap-cell hm-low">FIX</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+
+      <div class="heatmap-cell heatmap-row-label">Leadership Weight</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-low">FLAG</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-medium">RAISE</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+      <div class="heatmap-cell hm-none">&mdash;</div>
+    </div>
+
+    <div class="callout">
+      <h4>How to Read This</h4>
+      <p><strong style="color:var(--high)">RED = Action required from you</strong> &middot; <strong style="color:var(--medium)">AMBER = Update needed</strong> &middot; <strong style="color:var(--low)">GREEN = Minor fix</strong> &middot; <strong style="color:var(--aligned)">OK/DONE = Already aligned</strong> &middot; &mdash; = Not applicable to your domain</p>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h4>Most Actions: COO-Care (Patrick)</h4>
+        <div class="compare-item"><span>CSAT scale</span><span class="gap-cell">Fix CCO scales</span></div>
+        <div class="compare-item"><span>CCO completeness</span><span class="gap-cell">Add STI + Values</span></div>
+        <div class="compare-item"><span>Engagement metric</span><span class="warn-cell">Update language</span></div>
+        <div class="compare-item"><span>Call metrics</span><span class="warn-cell">Add connected time</span></div>
+        <div class="compare-item"><span>Cascade document</span><span class="warn-cell">Create</span></div>
+      </div>
+      <div class="compare-card">
+        <h4>Fewest Actions: COS (Jody)</h4>
+        <div class="compare-item"><span>Engagement metric</span><span class="warn-cell">Update language</span></div>
+        <div class="compare-item"><span>Everything else</span><span class="ok-cell">Already aligned</span></div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:0">
+      <h4>Role Counts by Department</h4>
+      <p>CCO: 37 roles &middot; CGO: 28 roles &middot; CFO: 18 roles &middot; CIO: 18 roles &middot; CQOO: 11 roles &middot; CPO: 9 roles &middot; CEO domain: 22 roles &middot; Executives: 8 roles &middot; <strong>Total: 158</strong></p>
+    </div>
+  </div>
+
+  <!-- TAB: CSAT -->
+  <div class="section" id="sec-csat">
+    <h2 class="section-title">CSAT Scale Chaos <span class="severity-tag severity-high">HIGH SEVERITY</span></h2>
+    <p class="section-desc">Three different scales (1-5, 1-10, percentage) across departments. Within CCO, two scales are used simultaneously. Enterprise CSAT reporting is impossible.</p>
+
+    <div class="before-after">
+      <div class="ba-col ba-before">
+        <h4>Current State (Chaos)</h4>
+        <div class="ba-item">CGO: <strong>1-5 scale</strong>, target &#8805;4.0/5</div>
+        <div class="ba-item">CFO: <strong>1-10 scale</strong>, target &#8805;8.0/10</div>
+        <div class="ba-item">CCO Care Partners: <strong>Percentage</strong>, target &#8805;85%</div>
+        <div class="ba-item">CCO Ops Managers: <strong>1-5 scale</strong>, target &#8805;4.0/5</div>
+        <div class="ba-item">CIO: <strong>Mixed</strong> &mdash; 1-10 scale but /5 targets</div>
+        <div class="ba-item">CPO: <strong>Mixed</strong> &mdash; 1-10 and % in same dept</div>
+        <div class="ba-item">CQOO: <strong>1-10 scale</strong>, target &#8805;8.0/10</div>
+        <div class="ba-item">CEO/P&C: <strong>1-10 scale</strong> &middot; CEO/S&S: <strong>1-5 scale</strong></div>
+        <div class="ba-item">Executives: <strong>1-5 scale</strong>, target &#8805;4/5</div>
+      </div>
+      <div class="ba-arrow">&#8594;</div>
+      <div class="ba-col ba-after">
+        <h4>Proposed Standard</h4>
+        <div class="ba-item">All departments: <strong style="color:var(--aligned)">1-5 scale</strong></div>
+        <div class="ba-item">Client/External CSAT: <strong style="color:var(--aligned)">&#8805;4.0/5</strong></div>
+        <div class="ba-item">Internal Stakeholder: <strong style="color:var(--aligned)">&#8805;4.0/5</strong></div>
+        <div class="ba-item">3 C's framework: <strong>Keep questions, change scale</strong></div>
+        <div class="ba-item" style="margin-top:12px;padding-top:8px;border-top:1px solid var(--border)"><strong style="color:var(--tc-light-teal)">Equivalence mapping:</strong></div>
+        <div class="ba-item">4.0/5 = 8.0/10 = 80%</div>
+        <div class="ba-item">4.25/5 = 8.5/10 = 85%</div>
+        <div class="ba-item">4.5/5 = 9.0/10 = 90%</div>
+      </div>
+    </div>
+
+    <div class="filters" id="csatFilters">
+      <div class="filter-chip active" data-filter="all" onclick="filterCSAT('all')">All Departments</div>
+      <div class="filter-chip" data-filter="1-5" onclick="filterCSAT('1-5')">Scale 1-5</div>
+      <div class="filter-chip" data-filter="1-10" onclick="filterCSAT('1-10')">Scale 1-10</div>
+      <div class="filter-chip" data-filter="pct" onclick="filterCSAT('pct')">Percentage</div>
+      <div class="filter-chip" data-filter="mixed" onclick="filterCSAT('mixed')">Mixed (Problem!)</div>
+    </div>
+
+    <table id="csatTable">
+      <thead><tr><th onclick="sortTable('csatTable',0)">Department <span class="sort-arrow">&#9660;</span></th><th>Scale</th><th>Target</th><th>Framework</th><th>Example</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr data-scale="1-5"><td>CGO (all roles)</td><td class="mono">1&ndash;5</td><td class="mono">&#8805;4.0/5</td><td>Custom per role</td><td class="small-text">"How satisfied with sign-up?"</td><td class="ok-cell">Matches exec standard</td></tr>
+        <tr data-scale="1-10"><td>CFO (all roles)</td><td class="mono">1&ndash;10</td><td class="mono">&#8805;8.0/10</td><td>3 C's (Comms, Access, Curiosity)</td><td class="small-text">Fixed 3 questions</td><td class="warn-cell">Different scale</td></tr>
+        <tr data-scale="pct"><td>CCO (Care Partners)</td><td class="mono">%</td><td class="mono">&#8805;85%</td><td>Quarterly average</td><td class="small-text">No numbered scale</td><td class="gap-cell">No standard scale</td></tr>
+        <tr data-scale="mixed"><td>CCO (Ops Managers)</td><td class="mono">1&ndash;5</td><td class="mono">&#8805;4.0/5</td><td>Standard</td><td class="small-text">Standard</td><td class="gap-cell">Mixed within CCO!</td></tr>
+        <tr data-scale="mixed"><td>CIO (most roles)</td><td class="mono">1&ndash;10</td><td class="mono">&#8805;4.0&ndash;4.5/5</td><td>Quarterly stakeholder</td><td class="small-text">Varies</td><td class="gap-cell">Scale vs target mismatch</td></tr>
+        <tr data-scale="mixed"><td>CPO</td><td class="mono">1&ndash;10 / %</td><td class="mono">&#8805;8.0/10 or &#8805;85%</td><td>Varies by role</td><td class="small-text">Varies</td><td class="gap-cell">Two scales in one dept</td></tr>
+        <tr data-scale="1-10"><td>CQOO (all roles)</td><td class="mono">1&ndash;10</td><td class="mono">&#8805;8.0/10</td><td>3 C's framework</td><td class="small-text">Same as CFO</td><td class="warn-cell">Different scale</td></tr>
+        <tr data-scale="1-10"><td>CEO / People &amp; Culture</td><td class="mono">1&ndash;10</td><td class="mono">&#8805;8/10</td><td>Quarterly</td><td class="small-text">Unique questions</td><td class="warn-cell">Different scale</td></tr>
+        <tr data-scale="1-5"><td>CEO / Service &amp; Support</td><td class="mono">1&ndash;5</td><td class="mono">&#8805;4/5</td><td>Standard</td><td class="small-text">Standard</td><td class="ok-cell">Matches exec standard</td></tr>
+        <tr data-scale="1-5"><td>Executive level (all)</td><td class="mono">1&ndash;5</td><td class="mono">&#8805;4/5</td><td>CSAT survey</td><td class="small-text">Exec standard</td><td class="ok-cell">BENCHMARK</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB: Calls -->
+  <div class="section" id="sec-calls">
+    <h2 class="section-title">Call Activity Metrics <span class="severity-tag severity-medium">MEDIUM SEVERITY</span></h2>
+    <p class="section-desc">Phone-based roles across 4 departments use different definitions. Standardising on Aircall enables cross-department benchmarking.</p>
+    <table id="callsTable">
+      <thead><tr><th onclick="sortTable('callsTable',0)">Role Group <span class="sort-arrow">&#9660;</span></th><th>Dept</th><th>Calls/Day</th><th>Time/Day</th><th>Callback SLA</th><th>Answer Rate</th><th>Gaps</th></tr></thead>
+      <tbody>
+        <tr><td>Sales Rep / Senior Sales Rep</td><td>CGO</td><td class="mono">&#8805;30 (&gt;60s)</td><td class="mono">&#8805;4 hrs</td><td class="text-dim">&mdash;</td><td class="gap-cell">Missing</td><td class="warn-cell">No answer rate</td></tr>
+        <tr><td>Client Experience Coordinator</td><td>CGO</td><td class="mono">&#8805;20 (&gt;60s)</td><td class="mono">&#8805;4 hrs</td><td class="text-dim">&mdash;</td><td class="gap-cell">Missing</td><td class="warn-cell">No answer rate</td></tr>
+        <tr><td>Client Success &amp; Retention</td><td>CGO</td><td class="mono">&#8805;30 (&gt;60s)</td><td class="mono">&#8805;2 hrs</td><td class="mono">&#8804;48 hrs</td><td class="gap-cell">Missing</td><td class="warn-cell">No answer rate</td></tr>
+        <tr><td>Partnership Manager</td><td>CGO</td><td class="mono">&#8805;20 (&gt;60s)</td><td class="mono">&#8805;2 hrs</td><td class="text-dim">&mdash;</td><td class="gap-cell">Missing</td><td class="warn-cell">No answer rate</td></tr>
+        <tr><td>Care Partner (FC &amp; SM)</td><td>CCO</td><td class="mono">&#8805;15</td><td class="gap-cell">Missing</td><td class="mono">&#8804;24 hrs</td><td class="mono">&#8805;70%</td><td class="warn-cell">No time, no &gt;60s</td></tr>
+        <tr><td>Team Leader (all CCO)</td><td>CCO</td><td class="mono">&#8805;15</td><td class="gap-cell">Missing</td><td class="mono">&#8804;24 hrs</td><td class="mono">&#8805;70%</td><td class="warn-cell">No connected time</td></tr>
+        <tr><td>Client Services Partner</td><td>CEO/S&S</td><td class="gap-cell">Missing</td><td class="gap-cell">Missing</td><td class="mono">&#8804;4 bus hrs</td><td class="mono">&#8805;90%</td><td class="gap-cell">No volume metrics</td></tr>
+        <tr><td>Collections Officer</td><td>CFO</td><td class="gap-cell">Missing</td><td class="gap-cell">Missing</td><td class="text-dim">&mdash;</td><td class="gap-cell">Missing</td><td class="gap-cell">No call metrics</td></tr>
+      </tbody>
+    </table>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h4>Universal Metric Set (from Aircall)</h4>
+        <div class="compare-item"><span>Primary</span><span class="mono">Connected calls &gt;60s / day</span></div>
+        <div class="compare-item"><span>Secondary</span><span class="mono">Connected time / day</span></div>
+        <div class="compare-item"><span>Quality</span><span class="mono">Answer rate %</span></div>
+        <div class="compare-item"><span>Responsiveness</span><span class="mono">Callback SLA (hrs)</span></div>
+      </div>
+      <div class="compare-card">
+        <h4>Targets by Role Function</h4>
+        <div class="compare-item"><span>Outbound sales</span><span class="mono">&#8805;30 / &#8805;4hrs</span></div>
+        <div class="compare-item"><span>Relationship mgmt</span><span class="mono">&#8805;20 / &#8805;2hrs</span></div>
+        <div class="compare-item"><span>Care coordination</span><span class="mono">&#8805;15 / &#8805;2hrs / &#8805;70%</span></div>
+        <div class="compare-item"><span>Service support</span><span class="mono">&#8805;10 / &#8805;2hrs / &#8805;90%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Engagement -->
+  <div class="section" id="sec-engagement">
+    <h2 class="section-title">Team Engagement Metric Chaos <span class="severity-tag severity-medium">MEDIUM SEVERITY</span></h2>
+    <p class="section-desc">Four different metrics measure "how engaged is my team?" across departments.</p>
+    <table><thead><tr><th>Metric</th><th>Where Used</th><th>Target</th><th>Scale</th><th>Measurable?</th></tr></thead>
+      <tbody>
+        <tr><td>"Team engagement &#8805;4.0/5"</td><td>CGO, CIO, Exec KPIs</td><td class="mono">4.0/5</td><td class="mono">1&ndash;5</td><td class="warn-cell">No defined survey</td></tr>
+        <tr><td>"eNPS &#8805;30" or "&#8805;35"</td><td>CFO, CQOO, CEO/S&S</td><td class="mono">30&ndash;35</td><td class="mono">-100 to +100</td><td class="ok-cell">EH-sourced</td></tr>
+        <tr><td>"Team feedback score &#8805;85%"</td><td>CCO Team Leaders</td><td class="mono">85%</td><td class="mono">%</td><td class="warn-cell">Undefined source</td></tr>
+        <tr><td>"Employee engagement &#8805;75"</td><td>CEO exec, Head of P&C</td><td class="mono">75</td><td class="mono">EH survey</td><td class="ok-cell">Defined, enterprise-wide</td></tr>
+      </tbody>
+    </table>
+    <div class="compare-grid">
+      <div class="compare-card"><h4>Recommendation</h4><div class="compare-item"><span><strong>Primary</strong></span><span class="mono" style="color:var(--aligned)">EH Engagement Score &#8805;75</span></div><div class="compare-item"><span><strong>Secondary</strong></span><span class="mono" style="color:var(--aligned)">eNPS &#8805;30</span></div></div>
+      <div class="compare-card"><h4>Retire</h4><div class="compare-item"><span>"&#8805;4.0/5 engagement"</span><span class="gap-cell">No survey source</span></div><div class="compare-item"><span>"&#8805;85% positive"</span><span class="gap-cell">No survey source</span></div><div class="compare-item"><span>eNPS &#8805;35</span><span class="warn-cell">Align to &#8805;30</span></div></div>
+    </div>
+  </div>
+
+  <!-- TAB: Frameworks -->
+  <div class="section" id="sec-frameworks">
+    <h2 class="section-title">KPI Framework Inconsistency <span class="severity-tag severity-medium">MEDIUM SEVERITY</span></h2>
+    <p class="section-desc">Only CGO has a complete cascade document with archetypes, verification rules, and a structured cascade tree.</p>
+    <table><thead><tr><th>Department</th><th>Framework</th><th># KPIs</th><th>Measures/Area</th><th>Cascade?</th><th>Archetypes?</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>CGO</strong></td><td>Archetype + Cascade</td><td class="mono">5 (strict)</td><td class="mono">3&ndash;5 by level</td><td class="ok-cell">YES</td><td class="ok-cell">YES (5)</td><td class="ok-cell">Gold Standard</td></tr>
+        <tr><td><strong>CFO</strong></td><td>Balanced Scorecard</td><td class="mono">5</td><td class="mono">Varies</td><td class="gap-cell">NO</td><td class="gap-cell">NO</td><td class="warn-cell">Needs cascade</td></tr>
+        <tr><td><strong>CCO</strong></td><td>Mixed</td><td class="mono">4&ndash;6</td><td class="mono">Varies</td><td class="gap-cell">NO</td><td class="gap-cell">NO</td><td class="gap-cell">Inconsistent</td></tr>
+        <tr><td><strong>CIO</strong></td><td>Custom</td><td class="mono">5</td><td class="mono">Varies</td><td class="gap-cell">NO</td><td class="gap-cell">NO</td><td class="warn-cell">Needs cascade</td></tr>
+        <tr><td><strong>CPO</strong></td><td>Custom</td><td class="mono">5&ndash;7</td><td class="mono">Varies</td><td class="gap-cell">NO</td><td class="gap-cell">NO</td><td class="gap-cell">Over-complex</td></tr>
+        <tr><td><strong>CQOO</strong></td><td>Balanced Scorecard</td><td class="mono">5</td><td class="mono">Varies</td><td class="gap-cell">NO</td><td class="gap-cell">NO</td><td class="warn-cell">Needs cascade</td></tr>
+        <tr><td><strong>CEO/P&C</strong></td><td>Custom weighted</td><td class="mono">5</td><td class="mono">Varies</td><td class="gap-cell">NO</td><td class="gap-cell">NO</td><td class="warn-cell">Needs cascade</td></tr>
+        <tr><td><strong>CEO/S&S</strong></td><td>Balanced Scorecard</td><td class="mono">5</td><td class="mono">Varies</td><td class="gap-cell">NO</td><td class="gap-cell">NO</td><td class="warn-cell">Needs cascade</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><h4>CGO Cascade Model &mdash; Proposed Enterprise Standard</h4><p><strong style="color:var(--tc-light-teal)">Required per department:</strong> Role Archetypes &middot; Cascade Tree &middot; KPI Map per archetype &middot; Rules (4-5 areas, weights=100%, measures capped by level) &middot; Verification Checklist &middot; Change Log</p></div>
+  </div>
+
+  <!-- TAB: Attrition -->
+  <div class="section" id="sec-attrition">
+    <h2 class="section-title">Attrition Target Inconsistency <span class="severity-tag severity-low">LOW SEVERITY</span></h2>
+    <p class="section-desc">Targets vary by department for the same role level. CGO Sales TL &lt;15% vs BD TL &#8804;5% &mdash; same domain, 3x difference.</p>
+    <table><thead><tr><th>Level</th><th>CGO</th><th>CCO</th><th>CFO</th><th>CIO</th><th>CQOO</th><th>Proposed</th></tr></thead>
+      <tbody>
+        <tr><td><strong>L5</strong></td><td class="mono">&#8804;1 critical</td><td class="mono">&#8804;1 critical</td><td class="mono">&#8804;1 critical</td><td class="mono">&#8804;1 key</td><td class="mono">&#8804;1 critical</td><td class="ok-cell">&#8804;1 critical &#10003;</td></tr>
+        <tr><td><strong>L4</strong></td><td class="mono">&#8804;5%</td><td class="mono">&#8804;5%</td><td class="text-dim">&mdash;</td><td class="mono">Zero</td><td class="text-dim">&mdash;</td><td class="warn-cell">&rarr; &#8804;10%</td></tr>
+        <tr><td><strong>L3</strong></td><td><span class="gap-cell">&lt;15% Sales</span> / <span class="mono">&#8804;5% BD</span></td><td class="text-dim">&mdash;</td><td class="mono">&lt;15%</td><td class="mono">Zero</td><td class="mono">&lt;15%</td><td class="warn-cell">&rarr; &#8804;15%</td></tr>
+        <tr><td><strong>L2</strong></td><td class="text-dim">&mdash;</td><td class="text-dim">&mdash;</td><td class="text-dim">&mdash;</td><td class="text-dim">&mdash;</td><td class="text-dim">&mdash;</td><td class="warn-cell">&rarr; &#8804;20%</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-danger"><h4>Spotlight: CGO Internal Inconsistency</h4><p><strong style="color:var(--high)">Sales TL: &lt;15%</strong> vs <strong style="color:var(--high)">BD TL: &#8804;5%</strong> &mdash; both L3 Revenue Leadership. The 3x difference is unjustified. Align to &#8804;15% with a &#8804;10% stretch target.</p></div>
+  </div>
+
+  <!-- TAB: Leadership -->
+  <div class="section" id="sec-leadership">
+    <h2 class="section-title">Leadership KPI Weight Comparison</h2>
+    <p class="section-desc">"Leadership, Culture &amp; Capability" weight varies from 10% to 50%. Most variation is justified by role purpose.</p>
+    <table><thead><tr><th>Executive</th><th>Weight</th><th>Visual</th><th>Justification</th><th>Assessment</th></tr></thead>
+      <tbody>
+        <tr><td><strong>CFO</strong></td><td class="mono">50%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:50%;background:var(--medium);border-radius:3px;height:16px"></div></div></td><td class="small-text">TOM transition</td><td class="warn-cell">Temporary &mdash; rebalance post-TOM</td></tr>
+        <tr><td><strong>COS</strong></td><td class="mono">40%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:40%;background:var(--tc-teal);border-radius:3px;height:16px"></div></div></td><td class="small-text">Role IS culture</td><td class="ok-cell">Justified</td></tr>
+        <tr><td><strong>CEO</strong></td><td class="mono">20%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:20%;background:var(--tc-teal);border-radius:3px;height:16px"></div></div></td><td class="small-text">Broad portfolio</td><td class="ok-cell">Reasonable</td></tr>
+        <tr><td><strong>COO-Care</strong></td><td class="mono">20%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:20%;background:var(--tc-teal);border-radius:3px;height:16px"></div></div></td><td class="small-text">Large team + TOM</td><td class="ok-cell">Reasonable</td></tr>
+        <tr><td><strong>CGO</strong></td><td class="mono">15%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:15%;background:var(--tc-teal);border-radius:3px;height:16px"></div></div></td><td class="small-text">Revenue-focused</td><td class="ok-cell">Reasonable</td></tr>
+        <tr><td><strong>COO-QA</strong></td><td class="mono">15%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:15%;background:var(--tc-teal);border-radius:3px;height:16px"></div></div></td><td class="small-text">Compliance-focused</td><td class="ok-cell">Reasonable</td></tr>
+        <tr><td><strong>SA/CPO</strong></td><td class="mono">15%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:15%;background:var(--tc-teal);border-radius:3px;height:16px"></div></div></td><td class="small-text">Product-focused</td><td class="ok-cell">Reasonable</td></tr>
+        <tr><td><strong>CIO</strong></td><td class="mono">10%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:10%;background:var(--high);border-radius:3px;height:16px"></div></div></td><td class="small-text">Tech-focused</td><td class="gap-cell">Too low &mdash; recommend &#8805;15%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB: Gaps -->
+  <div class="section" id="sec-gaps">
+    <h2 class="section-title">Missing Elements &amp; Gaps <span class="severity-tag severity-high">3 CRITICAL</span></h2>
+    <p class="section-desc">Structural gaps where KPI content is missing, incomplete, or internally inconsistent.</p>
+    <div class="filters" id="gapFilters">
+      <div class="filter-chip active" data-filter="all" onclick="filterGaps('all')">All</div>
+      <div class="filter-chip" data-filter="high" onclick="filterGaps('high')">High</div>
+      <div class="filter-chip" data-filter="medium" onclick="filterGaps('medium')">Medium</div>
+      <div class="filter-chip" data-filter="low" onclick="filterGaps('low')">Low</div>
+    </div>
+    <table id="gapsTable"><thead><tr><th>Gap</th><th>Department</th><th>Severity</th><th>Owner</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr data-severity="high"><td>CEO has NO CSAT questions</td><td>CEO</td><td><span class="severity-tag severity-high">HIGH</span></td><td>Luke / Nick</td><td>Add 8 questions (5 stakeholder + 3 board)</td></tr>
+        <tr data-severity="high"><td>CCO roles lack STI formulas</td><td>CCO</td><td><span class="severity-tag severity-high">HIGH</span></td><td>Patrick / Hanno</td><td>Add STI to all 37 CCO KPI files</td></tr>
+        <tr data-severity="high"><td>CCO uses % CSAT, Ops Mgrs use /5</td><td>CCO</td><td><span class="severity-tag severity-high">HIGH</span></td><td>Patrick</td><td>Standardise all to 1-5</td></tr>
+        <tr data-severity="medium"><td>CCO roles lack Values Assessment</td><td>CCO</td><td><span class="severity-tag severity-medium">MED</span></td><td>Patrick / Hanno</td><td>Add Keystones of Care section</td></tr>
+        <tr data-severity="medium"><td>No cascade docs (CFO, CIO, CPO, CQOO)</td><td>Multiple</td><td><span class="severity-tag severity-medium">MED</span></td><td>Each C-suite</td><td>Create _KPI-CASCADE.md</td></tr>
+        <tr data-severity="medium"><td>CIO roles mix 1-5 and 1-10</td><td>CIO</td><td><span class="severity-tag severity-medium">MED</span></td><td>Mike</td><td>Standardise to one scale</td></tr>
+        <tr data-severity="low"><td>Head of Product Design has 7 KPI areas</td><td>CPO</td><td><span class="severity-tag severity-low">LOW</span></td><td>William</td><td>Consolidate to 5</td></tr>
+        <tr data-severity="low"><td>Collections Officer has no call metrics</td><td>CFO</td><td><span class="severity-tag severity-low">LOW</span></td><td>Marko</td><td>Add if phone-based</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB: Actions -->
+  <div class="section" id="sec-actions">
+    <h2 class="section-title">Recommended Actions &mdash; Priority Order</h2>
+    <p class="section-desc">Check off completed items (persists across sessions). Owners assigned per action.</p>
+
+    <div class="quick-wins">
+      <div class="qw-column immediate">
+        <h3>Quick Wins (This Week)</h3>
+        <div class="qw-item"><strong>Add CEO CSAT questions</strong> &mdash; copy 5+3 template from any other exec KPI, customise for CEO/Board.<div class="qw-owner">Owner: Nick Lunn &middot; 30 min</div></div>
+        <div class="qw-item"><strong>Fix CCO internal scale</strong> &mdash; change Care Partner CSAT from &#8805;85% to &#8805;4.25/5.<div class="qw-owner">Owner: Patrick Hawker &middot; 1 hr</div></div>
+        <div class="qw-item"><strong>Align CGO BD attrition</strong> &mdash; change BD TL from &#8804;5% to &#8804;15%.<div class="qw-owner">Owner: Nick Lunn &middot; 5 min</div></div>
+        <div class="qw-item"><strong>Bump CIO Leadership weight</strong> &mdash; 10% &rarr; 15%, reduce another area by 5%.<div class="qw-owner">Owner: Mike Wise &middot; 15 min</div></div>
+      </div>
+      <div class="qw-column consult">
+        <h3>Needs Exec Consultation</h3>
+        <div class="qw-item"><strong>Enterprise CSAT scale</strong> &mdash; exec team agreement on 1-5 as universal.<div class="qw-owner">Owner: Hanno Nieuwoudt (P&C) &middot; ELT decision</div></div>
+        <div class="qw-item"><strong>Engagement metric</strong> &mdash; confirm EH survey score as primary enterprise metric.<div class="qw-owner">Owner: Hanno Nieuwoudt (P&C) &middot; ELT decision</div></div>
+        <div class="qw-item"><strong>Department cascades</strong> &mdash; each C-suite builds their cascade from CGO template.<div class="qw-owner">Owner: Each C-suite member &middot; 2-4 weeks</div></div>
+        <div class="qw-item"><strong>CCO STI &amp; Values</strong> &mdash; add STI formulas and Keystones to all CCO roles.<div class="qw-owner">Owner: Patrick Hawker + Hanno &middot; 2 weeks</div></div>
+      </div>
+    </div>
+
+    <div class="rec-list" id="recList">
+      <div class="rec-card" data-rec="1"><div class="rec-check" onclick="toggleRec(this)"></div><div class="rec-num">1</div><div class="rec-body"><div class="rec-title">CSAT Scale Standardisation</div><div class="rec-desc">Adopt 1-5 for all CSAT. Retire 1-10 and %. Keep 3 C's questions, change scale. Equivalence: 4.0/5 = 8.0/10 = 80%.</div><div class="rec-meta"><span class="rec-owner">Hanno (P&C) + All Execs</span><div class="rec-tags"><span class="rec-tag">ALL DEPTS</span><span class="rec-tag severity-tag severity-high" style="font-size:10px">HIGH</span></div></div></div></div>
+      <div class="rec-card" data-rec="2"><div class="rec-check" onclick="toggleRec(this)"></div><div class="rec-num">2</div><div class="rec-body"><div class="rec-title">Add CEO CSAT Questions</div><div class="rec-desc">Add 5 internal stakeholder + 3 board questions. Only exec without this section.</div><div class="rec-meta"><span class="rec-owner">Nick Lunn</span><div class="rec-tags"><span class="rec-tag">CEO</span><span class="rec-tag">QUICK WIN</span></div></div></div></div>
+      <div class="rec-card" data-rec="3"><div class="rec-check" onclick="toggleRec(this)"></div><div class="rec-num">3</div><div class="rec-body"><div class="rec-title">CCO KPI File Completion</div><div class="rec-desc">Add STI formulas (L5=20%, L4=15%, L3=10%, L2=5%, L1=5%), Values Assessment (Keystones), and standardise CSAT to 1-5 across all 37 CCO roles.</div><div class="rec-meta"><span class="rec-owner">Patrick Hawker + Hanno</span><div class="rec-tags"><span class="rec-tag">CCO</span><span class="rec-tag severity-tag severity-high" style="font-size:10px">HIGH</span></div></div></div></div>
+      <div class="rec-card" data-rec="4"><div class="rec-check" onclick="toggleRec(this)"></div><div class="rec-num">4</div><div class="rec-body"><div class="rec-title">Enterprise Engagement Metric</div><div class="rec-desc">EH Engagement Score (&#8805;75) as primary. eNPS (&#8805;30) as secondary. Retire "&#8805;4.0/5" and "&#8805;85%" &mdash; no defined survey source.</div><div class="rec-meta"><span class="rec-owner">Hanno Nieuwoudt (P&C)</span><div class="rec-tags"><span class="rec-tag">ALL DEPTS</span><span class="rec-tag">P&C LED</span></div></div></div></div>
+      <div class="rec-card" data-rec="5"><div class="rec-check" onclick="toggleRec(this)"></div><div class="rec-num">5</div><div class="rec-body"><div class="rec-title">Call Activity Standardisation</div><div class="rec-desc">Universal: "Connected calls &gt;60s/day", "Connected time/day", "Answer rate %". All from Aircall. CGO adds answer rate, CCO adds connected time.</div><div class="rec-meta"><span class="rec-owner">Nick + Patrick + Jody</span><div class="rec-tags"><span class="rec-tag">CGO</span><span class="rec-tag">CCO</span><span class="rec-tag">CEO/S&S</span></div></div></div></div>
+      <div class="rec-card" data-rec="6"><div class="rec-check" onclick="toggleRec(this)"></div><div class="rec-num">6</div><div class="rec-body"><div class="rec-title">Department Cascade Documents</div><div class="rec-desc">Every domain creates _KPI-CASCADE.md: archetypes, cascade tree, KPI map, verification checklist, change log. Template from CGO.</div><div class="rec-meta"><span class="rec-owner">Each C-suite member</span><div class="rec-tags"><span class="rec-tag">CFO</span><span class="rec-tag">CCO</span><span class="rec-tag">CIO</span><span class="rec-tag">CPO</span><span class="rec-tag">CQOO</span></div></div></div></div>
+      <div class="rec-card" data-rec="7"><div class="rec-check" onclick="toggleRec(this)"></div><div class="rec-num">7</div><div class="rec-body"><div class="rec-title">Attrition Target by Level</div><div class="rec-desc">Enterprise-wide: L5 &#8804;1 critical, L4 &#8804;10%, L3 &#8804;15%, L2 &#8804;20%. Fixes CGO Sales vs BD inconsistency.</div><div class="rec-meta"><span class="rec-owner">Hanno (P&C) + All Execs</span><div class="rec-tags"><span class="rec-tag">ALL DEPTS</span></div></div></div></div>
+      <div class="rec-card" data-rec="8"><div class="rec-check" onclick="toggleRec(this)"></div><div class="rec-num">8</div><div class="rec-body"><div class="rec-title">Leadership Weight Normalisation</div><div class="rec-desc">Flag CFO 50% as temporary (TOM). Increase CIO from 10% to &#8805;15%.</div><div class="rec-meta"><span class="rec-owner">Marko + Mike</span><div class="rec-tags"><span class="rec-tag">CFO</span><span class="rec-tag">CIO</span></div></div></div></div>
+    </div>
+
+    <div class="prompt-section">
+      <div class="prompt-header"><h3>Action Plan Summary</h3><button class="btn btn-primary" onclick="copyPrompt()">Copy to Clipboard</button></div>
+      <div class="prompt-content" id="promptOutput"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="kb-hint"><kbd>1</kbd>&ndash;<kbd>0</kbd> switch tabs &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> prev/next</div>
+
+<script>
+const TABS = ['overview','heatmap','csat','calls','engagement','frameworks','attrition','leadership','gaps','actions'];
+
+// Tab switching with URL hash
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const tab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+  if (tab) { tab.classList.add('active'); document.getElementById('sec-'+tabName).classList.add('active'); history.replaceState(null,null,'#'+tabName); }
+}
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+// Load from URL hash
+if (location.hash) { const h = location.hash.slice(1); if (TABS.includes(h)) switchTab(h); }
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const num = parseInt(e.key);
+  if (!isNaN(num) && num >= 0 && num <= 9) { const idx = num === 0 ? 9 : num - 1; if (TABS[idx]) switchTab(TABS[idx]); }
+  if (e.key === 'ArrowRight') { const cur = TABS.indexOf(document.querySelector('.tab.active')?.dataset.tab); if (cur < TABS.length-1) switchTab(TABS[cur+1]); }
+  if (e.key === 'ArrowLeft') { const cur = TABS.indexOf(document.querySelector('.tab.active')?.dataset.tab); if (cur > 0) switchTab(TABS[cur-1]); }
+});
+
+// Share tab link
+function shareTab() {
+  const url = location.origin + location.pathname + location.hash;
+  navigator.clipboard.writeText(url).then(() => { const fb=document.getElementById('copiedFeedback'); fb.textContent='Tab link copied'; fb.classList.add('show'); setTimeout(()=>{fb.classList.remove('show');fb.textContent='Copied to clipboard'},2000); });
+}
+
+// Table sorting
+function sortTable(tableId, colIdx) {
+  const table=document.getElementById(tableId), tbody=table.querySelector('tbody'), rows=Array.from(tbody.rows);
+  const th=table.querySelectorAll('thead th')[colIdx], isAsc=th.classList.contains('sorted')&&th.dataset.dir==='asc';
+  table.querySelectorAll('thead th').forEach(h=>{h.classList.remove('sorted');delete h.dataset.dir});
+  th.classList.add('sorted'); th.dataset.dir=isAsc?'desc':'asc';
+  rows.sort((a,b)=>{const aT=a.cells[colIdx]?.textContent.trim()||'',bT=b.cells[colIdx]?.textContent.trim()||'',aN=parseFloat(aT.replace(/[^0-9.-]/g,'')),bN=parseFloat(bT.replace(/[^0-9.-]/g,''));if(!isNaN(aN)&&!isNaN(bN))return isAsc?bN-aN:aN-bN;return isAsc?bT.localeCompare(aT):aT.localeCompare(bT)});
+  rows.forEach(r=>tbody.appendChild(r));
+}
+
+// Filters
+function filterCSAT(s){document.querySelectorAll('#csatFilters .filter-chip').forEach(c=>c.classList.remove('active'));document.querySelector(`#csatFilters [data-filter="${s}"]`).classList.add('active');document.querySelectorAll('#csatTable tbody tr').forEach(r=>{r.style.display=s==='all'?'':r.dataset.scale===s?'':'none';})}
+function filterGaps(s){document.querySelectorAll('#gapFilters .filter-chip').forEach(c=>c.classList.remove('active'));document.querySelector(`#gapFilters [data-filter="${s}"]`).classList.add('active');document.querySelectorAll('#gapsTable tbody tr').forEach(r=>{r.style.display=s==='all'?'':r.dataset.severity===s?'':'none';})}
+
+// Recommendations with localStorage
+const STORAGE_KEY = 'tc-kpi-audit-recs';
+function loadRecs(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');Object.entries(d).forEach(([k,v])=>{if(v){const card=document.querySelector(`.rec-card[data-rec="${k}"]`);if(card){card.classList.add('checked');const chk=card.querySelector('.rec-check');chk.classList.add('done');chk.textContent='\u2713'}}});updateProgress();}catch(e){}}
+function saveRecs(){const d={};document.querySelectorAll('.rec-card').forEach(c=>{d[c.dataset.rec]=c.classList.contains('checked')});localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
+function toggleRec(el){el.classList.toggle('done');el.textContent=el.classList.contains('done')?'\u2713':'';el.closest('.rec-card').classList.toggle('checked');saveRecs();updateProgress();updatePrompt()}
+function updateProgress(){const total=document.querySelectorAll('.rec-card').length,done=document.querySelectorAll('.rec-card.checked').length;document.getElementById('progressBar').style.width=`${(done/total)*100}%`;document.getElementById('progressText').textContent=`${done}/${total} actions complete`}
+
+// Prompt
+function updatePrompt(){
+  const recs=document.querySelectorAll('.rec-card');const pending=[],done=[];
+  recs.forEach(c=>{const n=c.dataset.rec,t=c.querySelector('.rec-title').textContent,d=c.querySelector('.rec-desc').textContent,o=c.querySelector('.rec-owner')?.textContent||'';
+    if(c.classList.contains('checked')){done.push(`\u2713 ${n}. ${t}`)}else{pending.push(`${n}. ${t}\n   Owner: ${o}\n   ${d}`)}});
+  let p=`KPI ALIGNMENT AUDIT \u2014 ACTION PLAN\nTrilogy Care | 31 March 2026\n${'='.repeat(50)}\n\nSCOPE: 158 roles, 8 departments.\nFINDINGS: 12 issues (3 critical, 5 medium, 4 low).\nALIGNMENT SCORE: 62%\n\n`;
+  if(done.length>0)p+=`COMPLETED (${done.length}/${recs.length})\n${'-'.repeat(30)}\n${done.join('\n')}\n\n`;
+  p+=`OUTSTANDING (${pending.length}/${recs.length})\n${'-'.repeat(30)}\n${pending.join('\n\n')}\n\n`;
+  p+=`QUICK WINS:\n\u2022 Add CEO CSAT questions (Nick, 30 min)\n\u2022 Fix CCO CSAT: \u226585% \u2192 \u22654.25/5 (Patrick, 1 hr)\n\u2022 CGO BD TL attrition: \u22645% \u2192 \u226415% (Nick, 5 min)\n\u2022 CIO Leadership weight: 10% \u2192 15% (Mike, 15 min)\n\nNEEDS CONSULTATION:\n\u2022 Enterprise CSAT scale (Hanno, ELT)\n\u2022 Engagement metric (Hanno, ELT)\n\u2022 Department cascades (each C-suite, 2-4 wks)\n\u2022 CCO STI/Values (Patrick + Hanno, 2 wks)`;
+  document.getElementById('promptOutput').textContent=p}
+
+function copyPrompt(){navigator.clipboard.writeText(document.getElementById('promptOutput').textContent).then(()=>{const fb=document.getElementById('copiedFeedback');fb.textContent='Copied to clipboard';fb.classList.add('show');setTimeout(()=>fb.classList.remove('show'),2000)})}
+
+// Init
+loadRecs(); updatePrompt();
+</script>
+
+</div>
+
+<script>
+const HASH='1d0fab7e4fc1fb41e4ec9d77b68e33e5f4baf2e8396aa92d55e0bbf1e0c1a95a';
+async function sha256(s){const d=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',d);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+async function checkPw(){const v=document.getElementById('pw-input').value;const h=await sha256(v);if(h===HASH){document.getElementById('pw-gate').classList.add('hidden');document.getElementById('app-content').style.display='block';sessionStorage.setItem('tc-kpi-audit-auth','1')}else{document.getElementById('pw-err').textContent='Incorrect code';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus()}}
+document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw()});
+if(sessionStorage.getItem('tc-kpi-audit-auth')==='1'){document.getElementById('pw-gate').classList.add('hidden');document.getElementById('app-content').style.display='block'}
+</script>
+
+</body>
+</html>
