@@ -206,6 +206,19 @@
   .callout h4 { font-size:12px; font-weight:700; margin-bottom:4px; }
   .callout p { font-size:12px; color:var(--text-muted); line-height:1.6; }
 
+  /* Proposed Standard */
+  .proposed-standard { background:linear-gradient(135deg,rgba(0,127,126,.08) 0%,rgba(44,76,121,.08) 100%); border:2px solid var(--tc-teal); border-radius:10px; padding:20px 24px; margin:20px 0; position:relative; }
+  .proposed-standard::before { content:'PROPOSED ENTERPRISE STANDARD'; position:absolute; top:-10px; left:16px; background:var(--tc-teal); color:#fff; font-size:9px; font-weight:800; letter-spacing:1px; padding:2px 10px; border-radius:4px; }
+  .proposed-standard h4 { font-size:14px; font-weight:700; color:var(--tc-light-teal); margin-bottom:12px; margin-top:4px; }
+  .proposed-standard table { margin-bottom:8px; }
+  .proposed-standard table thead th { background:rgba(0,127,126,.15); }
+  .proposed-standard .ps-note { font-size:11px; color:var(--text-dim); margin-top:10px; font-style:italic; }
+  .proposed-standard .ps-rule { display:flex; gap:8px; align-items:baseline; font-size:12px; padding:5px 0; border-bottom:1px solid rgba(42,58,78,.4); }
+  .proposed-standard .ps-rule:last-child { border-bottom:none; }
+  .proposed-standard .ps-rule-num { color:var(--tc-teal); font-weight:800; min-width:20px; }
+  .proposed-standard .ps-rule-text { color:var(--text-muted); }
+  .proposed-standard .ps-rule-text strong { color:var(--text); }
+
   /* Keyboard hint */
   .kb-hint { position:fixed; bottom:16px; right:16px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:11px; color:var(--text-dim); z-index:100; }
   .kb-hint kbd { background:var(--bg-header); border:1px solid var(--border); border-radius:3px; padding:1px 5px; font-family:inherit; font-size:10px; }
@@ -250,6 +263,8 @@
   <button id="pw-btn">Unlock</button>
 </div>
 <div id="app-wrap" style="display:none">
+
+
 <div class="copied-feedback" id="copiedFeedback">Copied to clipboard</div>
 
 <div class="header">
@@ -408,6 +423,24 @@
         <strong style="color:var(--medium)">CFO Leadership at 50%</strong> &mdash; justified by TOM transition, should rebalance post-transition.<br>
         <strong style="color:var(--aligned)">STI universally 20% at L5</strong> &mdash; well aligned. <strong style="color:var(--aligned)">Performance split consistent</strong> &mdash; CEO 40/60, all others 30/20/50.
       </p>
+    </div>
+
+    <div class="proposed-standard">
+      <h4>Executive KPI Scorecard Structure</h4>
+      <table>
+        <thead><tr><th>Element</th><th>Standard</th><th>Current Compliance</th></tr></thead>
+        <tbody>
+          <tr><td>KPI areas per exec</td><td class="mono">4&ndash;5</td><td class="ok-cell">All compliant (4 or 5)</td></tr>
+          <tr><td>Weights sum</td><td class="mono">= 100%</td><td class="ok-cell">All compliant</td></tr>
+          <tr><td>STI %</td><td class="mono">20% of base</td><td class="ok-cell">All compliant</td></tr>
+          <tr><td>Performance split</td><td class="mono">Co 30 + BU 20 + Ind 50 (CEO: Co 40 + Ind 60)</td><td class="ok-cell">All compliant</td></tr>
+          <tr><td>CSAT questions</td><td class="mono">8&ndash;9 (5 stakeholder + 3&ndash;4 team)</td><td class="gap-cell">CEO has 0 &mdash; fix required</td></tr>
+          <tr><td>Leadership weight</td><td class="mono">&ge;15% (except COS where culture IS the role)</td><td class="warn-cell">CIO at 10% &mdash; raise to 15%</td></tr>
+          <tr><td>Values assessment</td><td class="mono">Keystones of Care (6 values), scored 1&ndash;5</td><td class="ok-cell">All execs have this</td></tr>
+          <tr><td>Cross-functional CSAT</td><td class="mono">&ge;4.0/5 on stakeholder survey</td><td class="ok-cell">All compliant</td></tr>
+        </tbody>
+      </table>
+      <div class="ps-note">Decision required: Add CSAT questions to CEO KPI. Raise CIO leadership weight to 15%.</div>
     </div>
   </div>
 
@@ -590,6 +623,28 @@
         <tr data-scale="1-5"><td>Executive level (all)</td><td class="mono">1&ndash;5</td><td class="mono">&#8805;4/5</td><td>CSAT survey</td><td class="small-text">Exec standard</td><td class="ok-cell">BENCHMARK</td></tr>
       </tbody>
     </table>
+
+    <div class="proposed-standard">
+      <h4>CSAT Measurement Standard</h4>
+      <div class="ps-rule"><span class="ps-rule-num">1</span><span class="ps-rule-text"><strong>Universal scale: 1&ndash;5</strong> for all CSAT measurement (client, internal stakeholder, team). Retire 1&ndash;10 and percentage scales enterprise-wide.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">2</span><span class="ps-rule-text"><strong>Client/External CSAT target: &ge;4.0/5.</strong> Applies to all client-facing roles across CGO, CCO, CEO/S&S. Measured via post-interaction survey.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">3</span><span class="ps-rule-text"><strong>Internal Stakeholder CSAT target: &ge;4.0/5.</strong> Applies to all leadership roles (L3+). Measured via quarterly cross-functional survey.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">4</span><span class="ps-rule-text"><strong>3 C's framework retained</strong> (Communication, Accessibility, Curiosity) for CFO and CQOO roles &mdash; questions unchanged, scale changed from 1&ndash;10 to 1&ndash;5.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">5</span><span class="ps-rule-text"><strong>Survey frequency:</strong> Client CSAT = post-interaction (ongoing). Internal stakeholder = quarterly. Team pulse = quarterly.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">6</span><span class="ps-rule-text"><strong>CSAT questions per role type:</strong> Executive = 8&ndash;9 (5 stakeholder + 3&ndash;4 team). GM/Head = 4&ndash;6. Team Leader = 3&ndash;4. IC = 2&ndash;3 (client-facing only).</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">7</span><span class="ps-rule-text"><strong>Scoring bands:</strong> &ge;4.5 = Exceeds &middot; 4.0&ndash;4.49 = Meets &middot; 3.5&ndash;3.99 = Developing &middot; &lt;3.5 = Below. These feed into BSC Customer perspective and STI calculation.</span></div>
+      <table style="margin-top:12px">
+        <thead><tr><th>Transition</th><th>Old Scale</th><th>New Scale</th><th>Old Target</th><th>New Target</th></tr></thead>
+        <tbody>
+          <tr><td>CFO / CQOO (3 C's)</td><td class="mono">1&ndash;10</td><td class="mono">1&ndash;5</td><td class="mono">&ge;8.0/10</td><td class="mono">&ge;4.0/5</td></tr>
+          <tr><td>CCO Care Partners</td><td class="mono">%</td><td class="mono">1&ndash;5</td><td class="mono">&ge;85%</td><td class="mono">&ge;4.25/5</td></tr>
+          <tr><td>CIO (mixed)</td><td class="mono">1&ndash;10</td><td class="mono">1&ndash;5</td><td class="mono">&ge;4.0&ndash;4.5/5</td><td class="mono">&ge;4.0/5</td></tr>
+          <tr><td>CPO (mixed)</td><td class="mono">1&ndash;10 / %</td><td class="mono">1&ndash;5</td><td class="mono">varies</td><td class="mono">&ge;4.0/5</td></tr>
+          <tr><td>CEO/P&C</td><td class="mono">1&ndash;10</td><td class="mono">1&ndash;5</td><td class="mono">&ge;8/10</td><td class="mono">&ge;4.0/5</td></tr>
+        </tbody>
+      </table>
+      <div class="ps-note">Decision required: Exec team to confirm 1&ndash;5 as universal CSAT scale. P&C to update all role .md files within 4 weeks of approval.</div>
+    </div>
   </div>
 
   <!-- TAB: Calls -->
@@ -625,6 +680,25 @@
         <div class="compare-item"><span>Service support</span><span class="mono">&#8805;10 / &#8805;2hrs / &#8805;90%</span></div>
       </div>
     </div>
+
+    <div class="proposed-standard">
+      <h4>Call Activity Measurement Standard</h4>
+      <div class="ps-rule"><span class="ps-rule-num">1</span><span class="ps-rule-text"><strong>All phone-based roles must track 4 metrics:</strong> Connected Calls &gt;60s/day (volume), Connected Time/day (effort), Answer Rate % (quality), Callback SLA (responsiveness).</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">2</span><span class="ps-rule-text"><strong>Single source of truth: Aircall.</strong> All metrics pulled from Aircall reporting. &gt;60s qualifier applied universally to filter non-conversations.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">3</span><span class="ps-rule-text"><strong>Metric names must be identical</strong> in KPI files across departments. Use: "Connected calls &gt;60s per day", "Connected time per day", "Answer rate", "Callback SLA".</span></div>
+      <table style="margin-top:12px">
+        <thead><tr><th>Role Function</th><th>Depts</th><th>Calls/Day</th><th>Time/Day</th><th>Answer Rate</th><th>Callback SLA</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Outbound Sales</strong></td><td>CGO Sales</td><td class="mono">&ge;30</td><td class="mono">&ge;4 hrs</td><td class="mono">N/A</td><td class="mono">N/A</td></tr>
+          <tr><td><strong>Relationship / BD</strong></td><td>CGO BD</td><td class="mono">&ge;20</td><td class="mono">&ge;2 hrs</td><td class="mono">N/A</td><td class="mono">N/A</td></tr>
+          <tr><td><strong>Care Coordination</strong></td><td>CCO</td><td class="mono">&ge;15</td><td class="mono">&ge;2 hrs</td><td class="mono">&ge;70%</td><td class="mono">&le;24 hrs</td></tr>
+          <tr><td><strong>Service / Support</strong></td><td>CEO/S&S</td><td class="mono">&ge;10</td><td class="mono">&ge;2 hrs</td><td class="mono">&ge;90%</td><td class="mono">&le;4 bus hrs</td></tr>
+          <tr><td><strong>Collections</strong></td><td>CFO</td><td class="mono">&ge;15</td><td class="mono">&ge;2 hrs</td><td class="mono">N/A</td><td class="mono">N/A</td></tr>
+          <tr><td><strong>Retention / Save</strong></td><td>CGO Sales</td><td class="mono">&ge;30</td><td class="mono">&ge;2 hrs</td><td class="mono">N/A</td><td class="mono">&le;48 hrs</td></tr>
+        </tbody>
+      </table>
+      <div class="ps-note">Answer rate applies to inbound-heavy roles (Care, Support). Callback SLA applies where clients expect a return call. Targets are minimums &mdash; individual departments may set stretch targets above these.</div>
+    </div>
   </div>
 
   <!-- TAB: Engagement -->
@@ -642,6 +716,24 @@
     <div class="compare-grid">
       <div class="compare-card"><h4>Recommendation</h4><div class="compare-item"><span><strong>Primary</strong></span><span class="mono" style="color:var(--aligned)">EH Engagement Score &#8805;75</span></div><div class="compare-item"><span><strong>Secondary</strong></span><span class="mono" style="color:var(--aligned)">eNPS &#8805;30</span></div></div>
       <div class="compare-card"><h4>Retire</h4><div class="compare-item"><span>"&#8805;4.0/5 engagement"</span><span class="gap-cell">No survey source</span></div><div class="compare-item"><span>"&#8805;85% positive"</span><span class="gap-cell">No survey source</span></div><div class="compare-item"><span>eNPS &#8805;35</span><span class="warn-cell">Align to &#8805;30</span></div></div>
+    </div>
+
+    <div class="proposed-standard">
+      <h4>Team Engagement Measurement Standard</h4>
+      <div class="ps-rule"><span class="ps-rule-num">1</span><span class="ps-rule-text"><strong>Primary metric: Employment Hero Engagement Score.</strong> Target &ge;75 for all departments. This is the enterprise metric reported to the board and used in exec KPIs.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">2</span><span class="ps-rule-text"><strong>Secondary metric: eNPS.</strong> Target &ge;30 enterprise-wide. Subset question from the same EH pulse survey. Used in team leader and GM KPIs as a supporting indicator.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">3</span><span class="ps-rule-text"><strong>Frequency: Quarterly pulse survey</strong> via Employment Hero. Results available within 2 weeks. Managers review with team within 30 days.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">4</span><span class="ps-rule-text"><strong>Retire immediately:</strong> "Team engagement &ge;4.0/5" (no survey instrument), "Team feedback score &ge;85%" (undefined source). Replace with EH Engagement Score &ge;75 in all role .md files.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">5</span><span class="ps-rule-text"><strong>Standardise eNPS target:</strong> CQOO roles currently use &ge;35, others use &ge;30. Align all to <strong>&ge;30</strong>. Departments may set stretch targets internally.</span></div>
+      <table style="margin-top:12px">
+        <thead><tr><th>KPI File Language</th><th>Old (Retire)</th><th>New (Standard)</th></tr></thead>
+        <tbody>
+          <tr><td>Exec KPIs</td><td class="gap-cell">"Team engagement &ge;4/5"</td><td class="ok-cell">"EH Engagement Score &ge;75"</td></tr>
+          <tr><td>GM/Head KPIs</td><td class="gap-cell">"eNPS &ge;35" or "&ge;4.0/5"</td><td class="ok-cell">"EH Engagement Score &ge;75; eNPS &ge;30"</td></tr>
+          <tr><td>TL KPIs</td><td class="gap-cell">"Team feedback &ge;85%"</td><td class="ok-cell">"Pod eNPS &ge;30"</td></tr>
+        </tbody>
+      </table>
+      <div class="ps-note">Decision required: P&C to confirm EH pulse survey delivers both Engagement Score and eNPS. Validate that current survey questions generate these metrics.</div>
     </div>
   </div>
 
@@ -661,7 +753,31 @@
         <tr><td><strong>CEO/S&S</strong></td><td>Balanced Scorecard</td><td class="mono">5</td><td class="mono">Varies</td><td class="gap-cell">NO</td><td class="gap-cell">NO</td><td class="warn-cell">Needs cascade</td></tr>
       </tbody>
     </table>
-    <div class="callout"><h4>CGO Cascade Model &mdash; Proposed Enterprise Standard</h4><p><strong style="color:var(--tc-light-teal)">Required per department:</strong> Role Archetypes &middot; Cascade Tree &middot; KPI Map per archetype &middot; Rules (4-5 areas, weights=100%, measures capped by level) &middot; Verification Checklist &middot; Change Log</p></div>
+    <div class="proposed-standard">
+      <h4>KPI Cascade Document Standard</h4>
+      <div class="ps-rule"><span class="ps-rule-num">1</span><span class="ps-rule-text"><strong>Every C-suite domain creates <code>_KPI-CASCADE.md</code></strong> in their TEAMS directory. This is the single source of truth for all role KPIs in that domain.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">2</span><span class="ps-rule-text"><strong>Role Archetypes defined per department.</strong> Each role assigned to exactly one archetype. Suggested archetypes: Revenue Driver, Operational, Support, Leadership, Specialist. Departments may define their own but must have 3&ndash;5 archetypes.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">3</span><span class="ps-rule-text"><strong>Strict 4&ndash;5 KPI areas per role.</strong> No role may have fewer than 4 or more than 5. All weights must sum to exactly 100%.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">4</span><span class="ps-rule-text"><strong>Measures capped by level:</strong> L1&ndash;L2 (IC) = max 3 measures per KPI area. L3&ndash;L4 (TL/Senior) = max 4. L5 (Exec/Head) = max 5.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">5</span><span class="ps-rule-text"><strong>Cascade Tree:</strong> Visual hierarchy showing every role, reporting line, and archetype assignment. ASCII or Mermaid format.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">6</span><span class="ps-rule-text"><strong>Verification Checklist:</strong> Minimum 8 rules validated &mdash; weights sum, CSAT present on client-facing roles, measures capped, outcome KPIs weighted highest, STI section present, Values Assessment present.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">7</span><span class="ps-rule-text"><strong>Change Log:</strong> Every modification recorded with date, author, change description, and affected roles. No informal edits.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">8</span><span class="ps-rule-text"><strong>Every role file must include:</strong> KPI table with weights &middot; STI formula &middot; Values Assessment (Keystones) &middot; CSAT questions (if applicable) &middot; Performance-Culture Matrix &middot; Career progression.</span></div>
+      <table style="margin-top:12px">
+        <thead><tr><th>Department</th><th>Owner</th><th>Deadline</th><th>Template Source</th></tr></thead>
+        <tbody>
+          <tr><td>CGO</td><td>Nick Lunn</td><td class="ok-cell">Done</td><td>&mdash;</td></tr>
+          <tr><td>CCO</td><td>Patrick Hawker</td><td class="mono">+ 4 weeks</td><td>CGO _KPI-CASCADE.md</td></tr>
+          <tr><td>CFO</td><td>Marko Rukavina</td><td class="mono">+ 4 weeks</td><td>CGO _KPI-CASCADE.md</td></tr>
+          <tr><td>CIO</td><td>Mike Wise</td><td class="mono">+ 4 weeks</td><td>CGO _KPI-CASCADE.md</td></tr>
+          <tr><td>CPO</td><td>William Whitelaw</td><td class="mono">+ 4 weeks</td><td>CGO _KPI-CASCADE.md</td></tr>
+          <tr><td>CQOO</td><td>Erin Headley</td><td class="mono">+ 4 weeks</td><td>CGO _KPI-CASCADE.md</td></tr>
+          <tr><td>CEO/P&C</td><td>Hanno Nieuwoudt</td><td class="mono">+ 4 weeks</td><td>CGO _KPI-CASCADE.md</td></tr>
+          <tr><td>CEO/S&S</td><td>Jody Webb</td><td class="mono">+ 4 weeks</td><td>CGO _KPI-CASCADE.md</td></tr>
+        </tbody>
+      </table>
+      <div class="ps-note">Decision required: Exec team to agree on cascade model as enterprise standard. CGO provides template and 1-hour walkthrough per department.</div>
+    </div>
   </div>
 
   <!-- TAB: Attrition -->
@@ -677,6 +793,23 @@
       </tbody>
     </table>
     <div class="callout callout-danger"><h4>Spotlight: CGO Internal Inconsistency</h4><p><strong style="color:var(--high)">Sales TL: &lt;15%</strong> vs <strong style="color:var(--high)">BD TL: &#8804;5%</strong> &mdash; both L3 Revenue Leadership. The 3x difference is unjustified. Align to &#8804;15% with a &#8804;10% stretch target.</p></div>
+
+    <div class="proposed-standard">
+      <h4>Attrition Target Standard by Level</h4>
+      <div class="ps-rule"><span class="ps-rule-num">1</span><span class="ps-rule-text"><strong>Attrition targets are set by level, not by department.</strong> This ensures like-for-like roles are held to the same standard regardless of which C-suite domain they sit in.</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">2</span><span class="ps-rule-text"><strong>Metric language:</strong> Use "Voluntary annualised attrition" in all KPI files. Not "unplanned attrition" or "turnover" &mdash; consistent terminology.</span></div>
+      <table style="margin-top:12px">
+        <thead><tr><th>Level</th><th>Description</th><th>Enterprise Target</th><th>Stretch Target</th><th>KPI File Language</th></tr></thead>
+        <tbody>
+          <tr><td class="mono"><strong>L5</strong></td><td>Executive / Head</td><td class="mono">&le;1 critical role</td><td class="mono">Zero</td><td class="small-text">"Unplanned attrition of critical roles &le;1"</td></tr>
+          <tr><td class="mono"><strong>L4</strong></td><td>GM / Manager / TL (large)</td><td class="mono">&le;10% annualised</td><td class="mono">&le;7%</td><td class="small-text">"Voluntary annualised attrition &le;10%"</td></tr>
+          <tr><td class="mono"><strong>L3</strong></td><td>Senior / TL</td><td class="mono">&le;15% annualised</td><td class="mono">&le;10%</td><td class="small-text">"Voluntary annualised attrition &le;15%"</td></tr>
+          <tr><td class="mono"><strong>L2</strong></td><td>IC (mid-level)</td><td class="mono">&le;20% annualised</td><td class="mono">&le;15%</td><td class="small-text">"Voluntary annualised attrition &le;20%"</td></tr>
+          <tr><td class="mono"><strong>L1</strong></td><td>IC (entry)</td><td class="mono">&le;25% annualised</td><td class="mono">&le;20%</td><td class="small-text">"Voluntary annualised attrition &le;25%"</td></tr>
+        </tbody>
+      </table>
+      <div class="ps-note">Decision required: P&C to validate targets against aged care industry benchmarks. CIO "zero unplanned" is aspirational but should align to &le;10% for L4 roles.</div>
+    </div>
   </div>
 
   <!-- TAB: Leadership -->
@@ -695,6 +828,26 @@
         <tr><td><strong>CIO</strong></td><td class="mono">10%</td><td><div style="width:100%;background:var(--border);border-radius:3px;height:16px"><div style="width:10%;background:var(--high);border-radius:3px;height:16px"></div></div></td><td class="small-text">Tech-focused</td><td class="gap-cell">Too low &mdash; recommend &#8805;15%</td></tr>
       </tbody>
     </table>
+
+    <div class="proposed-standard">
+      <h4>Leadership Weight Standard by Role Type</h4>
+      <div class="ps-rule"><span class="ps-rule-num">1</span><span class="ps-rule-text"><strong>Minimum 15% Leadership weight for all executives</strong> &mdash; people leadership is a core executive accountability. Only exception: COS where cultural impact IS the primary function (40% justified).</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">2</span><span class="ps-rule-text"><strong>Temporary overweighting must be flagged.</strong> CFO's 50% is driven by TOM transition. Add an expiry date or trigger condition (e.g., "rebalance to 20% once TOM is 100% operational").</span></div>
+      <div class="ps-rule"><span class="ps-rule-num">3</span><span class="ps-rule-text"><strong>Leadership KPI must include these universal sub-measures:</strong> Cross-functional stakeholder CSAT (&ge;4/5), team engagement (EH score &ge;75), unplanned attrition (&le;1 critical), and change communication (&ge;80% clarity for any exec running a TOM).</span></div>
+      <table style="margin-top:12px">
+        <thead><tr><th>Exec Role Type</th><th>Recommended Range</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue-focused (CGO)</td><td class="mono">15&ndash;20%</td><td class="small-text">Revenue KPIs dominate; people is a supporting pillar</td></tr>
+          <tr><td>Operations (COO-Care, COO-QA)</td><td class="mono">15&ndash;20%</td><td class="small-text">Large teams need leadership investment but ops outcomes are primary</td></tr>
+          <tr><td>Technology (CIO)</td><td class="mono">15&ndash;20%</td><td class="small-text">Tech talent retention critical; currently too low at 10%</td></tr>
+          <tr><td>Product/Strategy (SA/CPO)</td><td class="mono">15%</td><td class="small-text">Small team, output-focused; 15% is sufficient</td></tr>
+          <tr><td>Finance (CFO)</td><td class="mono">15&ndash;20% (post-TOM)</td><td class="small-text">Currently 50% for TOM transition; rebalance when complete</td></tr>
+          <tr><td>Culture (COS)</td><td class="mono">35&ndash;40%</td><td class="small-text">Culture IS the role &mdash; this weight is the primary function, not just a supporting pillar</td></tr>
+          <tr><td>CEO</td><td class="mono">20%</td><td class="small-text">Broadest portfolio; 20% balances against Financial, Growth, Strategy, Governance</td></tr>
+        </tbody>
+      </table>
+      <div class="ps-note">Immediate action: CIO to increase from 10% to 15% (reduce Trust &amp; Resilience by 5%). CFO to add expiry note to 50% Leadership weight.</div>
+    </div>
   </div>
 
   <!-- TAB: Gaps -->
@@ -719,6 +872,23 @@
         <tr data-severity="low"><td>Collections Officer has no call metrics</td><td>CFO</td><td><span class="severity-tag severity-low">LOW</span></td><td>Marko</td><td>Add if phone-based</td></tr>
       </tbody>
     </table>
+
+    <div class="proposed-standard">
+      <h4>Minimum Completeness Standard for All Role KPI Files</h4>
+      <div class="ps-rule"><span class="ps-rule-num">1</span><span class="ps-rule-text"><strong>Every role .md file must contain these sections:</strong></span></div>
+      <table style="margin-top:8px">
+        <thead><tr><th>Section</th><th>Required</th><th>CGO</th><th>CCO</th><th>CFO</th><th>CIO</th><th>CPO</th><th>CQOO</th><th>CEO</th></tr></thead>
+        <tbody>
+          <tr><td>KPI table (areas + weights = 100%)</td><td class="ok-cell">YES</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td></tr>
+          <tr><td>STI formula + performance split</td><td class="ok-cell">YES</td><td class="ok-cell">&#10003;</td><td class="gap-cell">MISSING</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td></tr>
+          <tr><td>Values Assessment (Keystones)</td><td class="ok-cell">YES</td><td class="ok-cell">&#10003;</td><td class="gap-cell">MISSING</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td></tr>
+          <tr><td>CSAT questions (if client/stakeholder facing)</td><td class="ok-cell">YES</td><td class="ok-cell">&#10003;</td><td class="warn-cell">Partial</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="warn-cell">CEO missing</td></tr>
+          <tr><td>Performance-Culture Matrix</td><td class="ok-cell">YES</td><td class="ok-cell">&#10003;</td><td class="gap-cell">MISSING</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td></tr>
+          <tr><td>Career progression / level expectations</td><td class="warn-cell">Recommended</td><td class="ok-cell">&#10003;</td><td class="warn-cell">Partial</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td><td class="ok-cell">&#10003;</td></tr>
+        </tbody>
+      </table>
+      <div class="ps-note">CCO has the largest gap: 37 role files missing STI, Values, and Performance-Culture Matrix sections. Estimated effort: 2 weeks with template automation.</div>
+    </div>
   </div>
 
   <!-- TAB: Actions -->
@@ -763,9 +933,77 @@
 </div>
 
 <div class="kb-hint"><kbd>1</kbd>&ndash;<kbd>0</kbd> switch tabs &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> prev/next</div>
+
+<script>
+const TABS = ['overview','heatmap','csat','calls','engagement','frameworks','attrition','leadership','gaps','actions'];
+
+// Tab switching with URL hash
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const tab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+  if (tab) { tab.classList.add('active'); document.getElementById('sec-'+tabName).classList.add('active'); history.replaceState(null,null,'#'+tabName); }
+}
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+// Load from URL hash
+if (location.hash) { const h = location.hash.slice(1); if (TABS.includes(h)) switchTab(h); }
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const num = parseInt(e.key);
+  if (!isNaN(num) && num >= 0 && num <= 9) { const idx = num === 0 ? 9 : num - 1; if (TABS[idx]) switchTab(TABS[idx]); }
+  if (e.key === 'ArrowRight') { const cur = TABS.indexOf(document.querySelector('.tab.active')?.dataset.tab); if (cur < TABS.length-1) switchTab(TABS[cur+1]); }
+  if (e.key === 'ArrowLeft') { const cur = TABS.indexOf(document.querySelector('.tab.active')?.dataset.tab); if (cur > 0) switchTab(TABS[cur-1]); }
+});
+
+// Share tab link
+function shareTab() {
+  const url = location.origin + location.pathname + location.hash;
+  navigator.clipboard.writeText(url).then(() => { const fb=document.getElementById('copiedFeedback'); fb.textContent='Tab link copied'; fb.classList.add('show'); setTimeout(()=>{fb.classList.remove('show');fb.textContent='Copied to clipboard'},2000); });
+}
+
+// Table sorting
+function sortTable(tableId, colIdx) {
+  const table=document.getElementById(tableId), tbody=table.querySelector('tbody'), rows=Array.from(tbody.rows);
+  const th=table.querySelectorAll('thead th')[colIdx], isAsc=th.classList.contains('sorted')&&th.dataset.dir==='asc';
+  table.querySelectorAll('thead th').forEach(h=>{h.classList.remove('sorted');delete h.dataset.dir});
+  th.classList.add('sorted'); th.dataset.dir=isAsc?'desc':'asc';
+  rows.sort((a,b)=>{const aT=a.cells[colIdx]?.textContent.trim()||'',bT=b.cells[colIdx]?.textContent.trim()||'',aN=parseFloat(aT.replace(/[^0-9.-]/g,'')),bN=parseFloat(bT.replace(/[^0-9.-]/g,''));if(!isNaN(aN)&&!isNaN(bN))return isAsc?bN-aN:aN-bN;return isAsc?bT.localeCompare(aT):aT.localeCompare(bT)});
+  rows.forEach(r=>tbody.appendChild(r));
+}
+
+// Filters
+function filterCSAT(s){document.querySelectorAll('#csatFilters .filter-chip').forEach(c=>c.classList.remove('active'));document.querySelector(`#csatFilters [data-filter="${s}"]`).classList.add('active');document.querySelectorAll('#csatTable tbody tr').forEach(r=>{r.style.display=s==='all'?'':r.dataset.scale===s?'':'none';})}
+function filterGaps(s){document.querySelectorAll('#gapFilters .filter-chip').forEach(c=>c.classList.remove('active'));document.querySelector(`#gapFilters [data-filter="${s}"]`).classList.add('active');document.querySelectorAll('#gapsTable tbody tr').forEach(r=>{r.style.display=s==='all'?'':r.dataset.severity===s?'':'none';})}
+
+// Recommendations with localStorage
+const STORAGE_KEY = 'tc-kpi-audit-recs';
+function loadRecs(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');Object.entries(d).forEach(([k,v])=>{if(v){const card=document.querySelector(`.rec-card[data-rec="${k}"]`);if(card){card.classList.add('checked');const chk=card.querySelector('.rec-check');chk.classList.add('done');chk.textContent='\u2713'}}});updateProgress();}catch(e){}}
+function saveRecs(){const d={};document.querySelectorAll('.rec-card').forEach(c=>{d[c.dataset.rec]=c.classList.contains('checked')});localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
+function toggleRec(el){el.classList.toggle('done');el.textContent=el.classList.contains('done')?'\u2713':'';el.closest('.rec-card').classList.toggle('checked');saveRecs();updateProgress();updatePrompt()}
+function updateProgress(){const total=document.querySelectorAll('.rec-card').length,done=document.querySelectorAll('.rec-card.checked').length;document.getElementById('progressBar').style.width=`${(done/total)*100}%`;document.getElementById('progressText').textContent=`${done}/${total} actions complete`}
+
+// Prompt
+function updatePrompt(){
+  const recs=document.querySelectorAll('.rec-card');const pending=[],done=[];
+  recs.forEach(c=>{const n=c.dataset.rec,t=c.querySelector('.rec-title').textContent,d=c.querySelector('.rec-desc').textContent,o=c.querySelector('.rec-owner')?.textContent||'';
+    if(c.classList.contains('checked')){done.push(`\u2713 ${n}. ${t}`)}else{pending.push(`${n}. ${t}\n   Owner: ${o}\n   ${d}`)}});
+  let p=`KPI ALIGNMENT AUDIT \u2014 ACTION PLAN\nTrilogy Care | 31 March 2026\n${'='.repeat(50)}\n\nSCOPE: 158 roles, 8 departments.\nFINDINGS: 12 issues (3 critical, 5 medium, 4 low).\nALIGNMENT SCORE: 62%\n\n`;
+  if(done.length>0)p+=`COMPLETED (${done.length}/${recs.length})\n${'-'.repeat(30)}\n${done.join('\n')}\n\n`;
+  p+=`OUTSTANDING (${pending.length}/${recs.length})\n${'-'.repeat(30)}\n${pending.join('\n\n')}\n\n`;
+  p+=`QUICK WINS:\n\u2022 Add CEO CSAT questions (Nick, 30 min)\n\u2022 Fix CCO CSAT: \u226585% \u2192 \u22654.25/5 (Patrick, 1 hr)\n\u2022 CGO BD TL attrition: \u22645% \u2192 \u226415% (Nick, 5 min)\n\u2022 CIO Leadership weight: 10% \u2192 15% (Mike, 15 min)\n\nNEEDS CONSULTATION:\n\u2022 Enterprise CSAT scale (Hanno, ELT)\n\u2022 Engagement metric (Hanno, ELT)\n\u2022 Department cascades (each C-suite, 2-4 wks)\n\u2022 CCO STI/Values (Patrick + Hanno, 2 wks)`;
+  document.getElementById('promptOutput').textContent=p}
+
+function copyPrompt(){navigator.clipboard.writeText(document.getElementById('promptOutput').textContent).then(()=>{const fb=document.getElementById('copiedFeedback');fb.textContent='Copied to clipboard';fb.classList.add('show');setTimeout(()=>fb.classList.remove('show'),2000)})}
+
+// Init
+loadRecs(); updatePrompt();
+</script>
+
 </div>
 <script>
-// Password gate — runs first, blocks everything until authed
 (function() {
   var hash = 'cbfad02f9ed2a8d1e08d8f74f5303e9eb93637d47f82ab6f1c15871cf8dd0481';
   var gate = document.getElementById('pw-gate');
@@ -773,34 +1011,17 @@
   var err = document.getElementById('pw-err');
   var btn = document.getElementById('pw-btn');
   var wrap = document.getElementById('app-wrap');
-
-  function unlock() {
-    gate.classList.add('hidden');
-    wrap.style.display = '';
-    sessionStorage.setItem('kpi-audit-auth', '1');
-    initApp();
-  }
-
-  if (sessionStorage.getItem('kpi-audit-auth') === '1') {
-    unlock();
-    return;
-  }
-
+  function unlock() { gate.classList.add('hidden'); wrap.style.display = ''; sessionStorage.setItem('kpi-audit-auth', '1'); initApp(); }
+  if (sessionStorage.getItem('kpi-audit-auth') === '1') { unlock(); return; }
   function check() {
     var v = inp.value.trim();
     if (!v) return;
     crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)).then(function(buf) {
       var h = Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-      if (h === hash) {
-        unlock();
-      } else {
-        err.textContent = 'Incorrect code';
-        inp.value = '';
-        inp.focus();
-      }
+      if (h === hash) { unlock(); }
+      else { err.textContent = 'Incorrect code'; inp.value = ''; inp.focus(); }
     });
   }
-
   btn.addEventListener('click', check);
   inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') check(); });
   inp.focus();
