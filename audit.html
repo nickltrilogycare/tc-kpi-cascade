@@ -16,7 +16,6 @@
   #pw-gate button{padding:8px 24px;border-radius:8px;border:none;background:#007F7E;color:#fff;font-size:14px;cursor:pointer;font-weight:600}
   #pw-gate button:hover{background:#009a99}
   #pw-gate .pw-logo{font-size:28px;font-weight:800;color:#64BCEA;margin-bottom:8px}
-  #app-content{display:none}
 
 
   :root {
@@ -242,17 +241,15 @@
 </style>
 </head>
 <body>
-
 <div id="pw-gate">
   <div class="pw-logo">TC</div>
   <h2>KPI Alignment Audit</h2>
   <div class="pw-sub">Enter access code to continue</div>
-  <input type="password" id="pw-input" maxlength="8" placeholder="&#8226;&#8226;&#8226;&#8226;" autofocus>
+  <input type="password" id="pw-input" maxlength="8" autofocus>
   <div class="pw-err" id="pw-err"></div>
-  <button onclick="checkPw()">Unlock</button>
+  <button id="pw-btn">Unlock</button>
 </div>
-
-<div id="app-content">
+<div id="app-wrap" style="display:none">
 
 
 <div class="copied-feedback" id="copiedFeedback">Copied to clipboard</div>
@@ -838,14 +835,28 @@ loadRecs(); updatePrompt();
 </script>
 
 </div>
-
 <script>
-const HASH='cbfad02f9ed2a8d1e08d8f74f5303e9eb93637d47f82ab6f1c15871cf8dd0481';
-async function sha256(s){const d=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',d);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
-async function checkPw(){const v=document.getElementById('pw-input').value;const h=await sha256(v);if(h===HASH){document.getElementById('pw-gate').classList.add('hidden');document.getElementById('app-content').style.display='block';sessionStorage.setItem('tc-kpi-audit-auth','1')}else{document.getElementById('pw-err').textContent='Incorrect code';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus()}}
-document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw()});
-if(sessionStorage.getItem('tc-kpi-audit-auth')==='1'){document.getElementById('pw-gate').classList.add('hidden');document.getElementById('app-content').style.display='block'}
+(function(){
+  const hash='cbfad02f9ed2a8d1e08d8f74f5303e9eb93637d47f82ab6f1c15871cf8dd0481';
+  const gate=document.getElementById('pw-gate');
+  const inp=document.getElementById('pw-input');
+  const err=document.getElementById('pw-err');
+  const btn=document.getElementById('pw-btn');
+  const wrap=document.getElementById('app-wrap');
+  function unlock(){gate.classList.add('hidden');wrap.style.display='';sessionStorage.setItem('kpi-audit-auth','1');}
+  if(sessionStorage.getItem('kpi-audit-auth')==='1'){unlock();}
+  async function check(){
+    const v=inp.value.trim();
+    if(!v)return;
+    const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));
+    const h=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    if(h===hash){unlock();}
+    else{err.textContent='Incorrect code';inp.value='';inp.focus();}
+  }
+  btn.addEventListener('click',check);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+  inp.focus();
+})();
 </script>
-
 </body>
 </html>
