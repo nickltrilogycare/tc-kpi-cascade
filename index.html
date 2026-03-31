@@ -155,6 +155,85 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+  /* Strategy view */
+  .strategy-controls { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .strategy-controls .ctrl-group { display: flex; gap: 4px; align-items: center; }
+  .strategy-controls .ctrl-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-right: 4px; }
+  .strategy-stats { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .strategy-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 100px; }
+  .strategy-stat .stat-val { font-size: 22px; font-weight: 800; color: var(--ltblue); }
+  .strategy-stat .stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+  .strategy-stat.gap .stat-val { color: #ef4444; }
+
+  .gantt-container { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); position: relative; }
+  .gantt-header { display: flex; position: sticky; top: 0; z-index: 2; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .gantt-header .gh-label { width: 300px; min-width: 300px; padding: 8px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); border-right: 1px solid var(--border); }
+  .gantt-header .gh-month { width: 60px; min-width: 60px; text-align: center; padding: 8px 0; font-size: 10px; color: var(--text-dim); border-right: 1px solid var(--border)22; }
+  .gantt-header .gh-link { width: 60px; min-width: 60px; text-align: center; padding: 8px 0; font-size: 10px; color: var(--text-dim); }
+
+  .gantt-group { border-bottom: 1px solid var(--border); }
+  .gantt-group-label { padding: 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border)44; }
+  .gantt-group-label.tsunami { color: #eab308; background: rgba(234,179,8,.06); }
+  .gantt-group-label.foundation { color: #3b82f6; background: rgba(59,130,246,.06); }
+  .gantt-group-label.scale { color: #22c55e; background: rgba(34,197,94,.06); }
+  .gantt-group-label.netnew { color: #a855f7; background: rgba(168,85,247,.06); }
+
+  .gantt-theme-label { padding: 4px 12px 4px 24px; font-size: 10px; font-weight: 600; color: var(--text-dim); background: var(--surface2)88; border-bottom: 1px solid var(--border)22; }
+
+  .gantt-row { display: flex; align-items: center; min-height: 32px; border-bottom: 1px solid var(--border)22; cursor: pointer; transition: background .1s; }
+  .gantt-row:hover { background: var(--surface2); }
+  .gantt-row.selected { background: var(--surface3); outline: 1px solid var(--ltblue); }
+
+  .gantt-label { width: 300px; min-width: 300px; padding: 4px 12px; font-size: 11px; color: var(--text); display: flex; align-items: center; gap: 6px; border-right: 1px solid var(--border)22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gantt-label .priority-badge { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .gantt-label .type-badge { font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 700; flex-shrink: 0; }
+  .gantt-label .type-badge.action { background: rgba(34,197,94,.2); color: #22c55e; }
+  .gantt-label .type-badge.build { background: rgba(59,130,246,.15); color: #60a5fa; }
+  .gantt-label .type-badge.needs-analysis { background: rgba(168,85,247,.15); color: #a855f7; }
+  .gantt-label .init-name { overflow: hidden; text-overflow: ellipsis; }
+
+  .gantt-timeline { display: flex; position: relative; flex: 1; }
+  .gantt-cell { width: 60px; min-width: 60px; height: 32px; border-right: 1px solid var(--border)11; position: relative; }
+  .gantt-bar { position: absolute; top: 6px; height: 20px; border-radius: 4px; z-index: 1; min-width: 8px; }
+  .gantt-bar.tsunami { background: #eab308; }
+  .gantt-bar.foundation { background: #3b82f6; }
+  .gantt-bar.scale { background: #22c55e; }
+  .gantt-bar.netnew { background: #a855f7; }
+  .gantt-bar.striped { background-image: repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(0,0,0,.15) 3px, rgba(0,0,0,.15) 6px); }
+
+  .link-indicator { width: 60px; min-width: 60px; text-align: center; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .link-indicator.linked { color: #22c55e; }
+  .link-indicator.gap { color: #ef4444; }
+
+  .initiative-detail { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 12px 0; }
+  .initiative-detail h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .initiative-detail .id-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .initiative-detail .id-tag { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .initiative-detail .id-linked { margin-top: 8px; }
+  .initiative-detail .id-linked h5 { font-size: 12px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+  .initiative-detail .id-role-link { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; cursor: pointer; background: var(--surface3); color: var(--ltblue); margin: 2px 4px 2px 0; border: 1px solid var(--border); transition: all .15s; }
+  .initiative-detail .id-role-link:hover { border-color: var(--ltblue); background: var(--primary); }
+  .initiative-detail .id-gap { color: #ef4444; font-size: 12px; font-weight: 600; padding: 8px 12px; background: rgba(239,68,68,.08); border-radius: 6px; margin-top: 6px; }
+
+  .gap-panel { margin-top: 20px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .gap-panel-header { padding: 12px 16px; background: rgba(239,68,68,.06); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .gap-panel-header h4 { font-size: 13px; font-weight: 700; color: #ef4444; }
+  .gap-panel-header .gap-count { font-size: 12px; color: #ef4444; font-weight: 600; }
+  .gap-panel-body { padding: 12px 16px; }
+  .gap-panel-body .gap-dept { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin: 8px 0 4px; }
+  .gap-panel-body .gap-dept:first-child { margin-top: 0; }
+  .gap-panel-body .gap-item { font-size: 11px; color: var(--text); padding: 3px 0; display: flex; align-items: center; gap: 6px; }
+  .gap-panel-body .gap-item .gap-pillar { padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; }
+  .gap-panel-body .gap-item .gap-priority { font-size: 9px; color: var(--text-dim); }
+
+  .strategy-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; cursor: pointer; margin: 2px 3px 2px 0; border: 1px solid transparent; transition: all .15s; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+  .strategy-pill:hover { opacity: .8; filter: brightness(1.2); }
+  .strategy-pill.tsunami { background: rgba(234,179,8,.15); color: #eab308; border-color: rgba(234,179,8,.3); }
+  .strategy-pill.foundation { background: rgba(59,130,246,.15); color: #60a5fa; border-color: rgba(59,130,246,.3); }
+  .strategy-pill.scale { background: rgba(34,197,94,.15); color: #22c55e; border-color: rgba(34,197,94,.3); }
+  .strategy-pill.netnew { background: rgba(168,85,247,.15); color: #a855f7; border-color: rgba(168,85,247,.3); }
+  .strategy-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin: 12px 0 4px; padding-top: 8px; border-top: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -175,6 +254,7 @@
       <div class="tab active" data-view="detail" onclick="switchView('detail')">Cascade Detail</div>
       <div class="tab" data-view="compare" onclick="switchView('compare')">Compare All</div>
       <div class="tab" data-view="principles" onclick="switchView('principles')">Principles</div>
+      <div class="tab" data-view="strategy" onclick="switchView('strategy')">Strategy</div>
     </div>
   </div>
   <div class="left">
@@ -1268,8 +1348,150 @@ const roles = [
     ]},
 ];
 
+const PILLAR_COLORS = { tsunami:'#eab308', foundation:'#3b82f6', scale:'#22c55e', netnew:'#a855f7' };
+const PILLAR_NAMES = { tsunami:'Tsunami', foundation:'Foundation', scale:'Scale', netnew:'Net New' };
+const MONTHS = ['Mar\'26','Apr\'26','May\'26','Jun\'26','Jul\'26','Aug\'26','Sep\'26','Oct\'26','Nov\'26','Dec\'26','Jan\'27','Feb\'27','Mar\'27','Apr\'27','May\'27','Jun\'27'];
+
+const strategyData = [
+  // ── TSUNAMI — SALES ──
+  {id:'s1',initiative:'Speed to Lead (<5 min + Auto-SMS)',dept:'sales',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gms','sso','sr','ssr'],linkedKpis:['Acquisition & Revenue','Inbound Performance & Triage']},
+  {id:'s2',initiative:'16,000+ Active Lead Re-engagement Program',dept:'sales',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gms','stl'],linkedKpis:[]},
+  {id:'s3',initiative:'Call Handling Capacity',dept:'sales',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['sso'],linkedKpis:['Inbound Performance & Triage']},
+  {id:'s4',initiative:'Priority Lead Allocation Based on Rep Performance',dept:'sales',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s5',initiative:'Sales Task Automation & Event-Triggered Follow-Ups',dept:'sales',pillar:'tsunami',theme:'Lead Management',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:[],linkedKpis:[]},
+  {id:'s6',initiative:'Pre-Onboarding Churn Fix — Lead to HCA',dept:'sales',pillar:'tsunami',theme:'Revenue Protection',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gms','csrs'],linkedKpis:['Client Retention & Churn Reduction']},
+  {id:'s7',initiative:'Fill 2 CEC Seats + Establish Concierge ROI Framework',dept:'sales',pillar:'tsunami',theme:'Revenue Protection',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['cec'],linkedKpis:[]},
+  {id:'s8',initiative:'Establish Controllable Churn Baseline & Hold the Line',dept:'sales',pillar:'tsunami',theme:'Revenue Protection',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms','csrs'],linkedKpis:['Client Retention & Churn Reduction']},
+  {id:'s9',initiative:'Care-to-Growth Referral Response (<48hrs)',dept:'sales',pillar:'tsunami',theme:'Revenue Protection',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms','csrs'],linkedKpis:['Client Retention & Churn Reduction']},
+
+  // ── TSUNAMI — BD ──
+  {id:'s10',initiative:'NDIS Launch — New Partner Acquisition',dept:'bd',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gmbd','pmtl','spm'],linkedKpis:['Partner Acquisition & Revenue']},
+  {id:'s11',initiative:'Marketing Support — BD Collateral & Campaign Alignment',dept:'bd',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s12',initiative:'Partner Email Sequences + Mass Scale Contact',dept:'bd',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gmbd','pmtl'],linkedKpis:['Partner Acquisition & Revenue']},
+  {id:'s13',initiative:'Register as Provider for Support at Home',dept:'bd',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'Critical',startMonth:0,endMonth:1,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s14',initiative:'B2B at Maximum Intensity',dept:'bd',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gmbd','pmtl','pm'],linkedKpis:['Partner Acquisition & Revenue']},
+  {id:'s15',initiative:'Reinstate P1 Flagging & Coordinator Email Mandatory',dept:'bd',pillar:'tsunami',theme:'Lead Management',type:'Action Now',priority:'Critical',startMonth:0,endMonth:1,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s16',initiative:'BD Headcount — Right-Size Team for Tsunami',dept:'bd',pillar:'tsunami',theme:'Efficiency & Workload',type:'Action Now',priority:'Critical',startMonth:0,endMonth:2,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s17',initiative:'RM → PM Role Change (Relationship Manager Uplift)',dept:'bd',pillar:'tsunami',theme:'Efficiency & Workload',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['rmtl','rm'],linkedKpis:[]},
+  {id:'s18',initiative:'AI Smarts — Reduce PM Workload, Prospect More',dept:'bd',pillar:'tsunami',theme:'Efficiency & Workload',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['pm'],linkedKpis:[]},
+  {id:'s19',initiative:'B2B Data Cleaning (SAH, NDIS, 3rd Segment)',dept:'bd',pillar:'tsunami',theme:'Efficiency & Workload',type:'Action Now',priority:'High',startMonth:1,endMonth:3,linkedRoles:['gmbd'],linkedKpis:['Foundational Delivery']},
+  {id:'s20',initiative:'Compliance/Care/Finance Dedicated Support Resources',dept:'bd',pillar:'tsunami',theme:'Revenue Protection',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s21',initiative:'Mitigate WBW Trust Concentration Risk',dept:'bd',pillar:'tsunami',theme:'Revenue Protection',type:'Action Now',priority:'High',startMonth:0,endMonth:2,linkedRoles:['gmbd'],linkedKpis:['Partner Retention & Revenue Protection']},
+
+  // ── TSUNAMI — MARKETING ──
+  {id:'s22',initiative:'Attribution & Measurement Infrastructure (CVR/CPL/CAC/ROMI)',dept:'mktg',pillar:'tsunami',theme:'Attribution, CRO & Quick Wins',type:'Action Now',priority:'Critical',startMonth:0,endMonth:2,linkedRoles:['mom','hodm'],linkedKpis:['Attribution & Marketing Performance','Marketing Ops & Intelligence']},
+  {id:'s23',initiative:'Competitor Intelligence & Paid Media Benchmarking',dept:'mktg',pillar:'tsunami',theme:'Attribution, CRO & Quick Wins',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['hodm','dml'],linkedKpis:['Marketing Ops & Intelligence']},
+  {id:'s24',initiative:'CRO Sprint — Website Conversion (heatmaps, landing pages)',dept:'mktg',pillar:'tsunami',theme:'Attribution, CRO & Quick Wins',type:'Action Now',priority:'High',startMonth:1,endMonth:3,linkedRoles:['hodm','dml'],linkedKpis:['Organic Acquisition & CRO']},
+  {id:'s25',initiative:'Lifecycle Nurture & Pre-Onboarding Churn Fix (14.6% → <5%)',dept:'mktg',pillar:'tsunami',theme:'Attribution, CRO & Quick Wins',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gmm','cas'],linkedKpis:['Lifecycle & Automation Performance']},
+  {id:'s26',initiative:'Proactive Review Generation',dept:'mktg',pillar:'tsunami',theme:'Attribution, CRO & Quick Wins',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['sme'],linkedKpis:['Social & Reputation']},
+
+  // ── FOUNDATION — SALES ──
+  {id:'s27',initiative:'Client Journey Mapping',dept:'sales',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s28',initiative:'Refine Sales Stage Definitions + Portal Migration Readiness',dept:'sales',pillar:'foundation',theme:'Process & Playbooks',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:['Foundational Delivery']},
+  {id:'s29',initiative:'Sales Playbook Documentation',dept:'sales',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:['Foundational Delivery']},
+  {id:'s30',initiative:'Revenue Management Process (Weekly Cadence)',dept:'sales',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s31',initiative:'Prospective Client Aged Care Journey Timeline',dept:'sales',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s32',initiative:'Gap Analysis & Tailored Leadership Recommendations',dept:'sales',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s33',initiative:'Build Retention Playbook & Stand Up Win-Back Function',dept:'sales',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms','csrs'],linkedKpis:['Client Retention & Churn Reduction']},
+  {id:'s34',initiative:'Standardise CRM Training',dept:'sales',pillar:'foundation',theme:'CRM & Data',type:'Action Now',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:['Foundational Delivery']},
+  {id:'s35',initiative:'CRM Data Clean-Up & Migration Readiness',dept:'sales',pillar:'foundation',theme:'CRM & Data',type:'Build',priority:'High',startMonth:4,endMonth:7,linkedRoles:['gms'],linkedKpis:['Foundational Delivery']},
+  {id:'s36',initiative:'CRM Migration to Portal',dept:'sales',pillar:'foundation',theme:'CRM & Data',type:'Build',priority:'High',startMonth:4,endMonth:7,linkedRoles:['gms'],linkedKpis:['Foundational Delivery']},
+  {id:'s37',initiative:'Revenue Tracking & Variance Management',dept:'sales',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s38',initiative:'Personal Sales Dashboard',dept:'sales',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s39',initiative:'AI Sales Call Analysis',dept:'sales',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:['Foundational Delivery']},
+  {id:'s40',initiative:'AI Sales Coaching Framework',dept:'sales',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms','stl'],linkedKpis:[]},
+  {id:'s41',initiative:'Competitor Intelligence & Market Position Analysis',dept:'sales',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s42',initiative:'Top Performer 360 Profile & Benchmarking',dept:'sales',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s43',initiative:'Market Sentiment & Sales Theme Intelligence',dept:'sales',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s44',initiative:'Formalise Churn Segmentation & Reporting',dept:'sales',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:4,endMonth:7,linkedRoles:['gms'],linkedKpis:['Foundational Delivery']},
+  {id:'s45',initiative:'Automatic Call Note Taking',dept:'sales',pillar:'foundation',theme:'Efficiency & Automation',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gms'],linkedKpis:['Foundational Delivery']},
+  {id:'s46',initiative:'Appointment Management & Attendance Automation',dept:'sales',pillar:'foundation',theme:'Efficiency & Automation',type:'Build',priority:'High',startMonth:4,endMonth:7,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s47',initiative:'Stand Up Proactive Win-Back Function',dept:'sales',pillar:'foundation',theme:'Defence & QA',type:'Build',priority:'High',startMonth:4,endMonth:7,linkedRoles:['gms','csrs'],linkedKpis:['Client Retention & Churn Reduction']},
+  {id:'s48',initiative:'Formalise QA Framework',dept:'sales',pillar:'foundation',theme:'Defence & QA',type:'Build',priority:'High',startMonth:4,endMonth:7,linkedRoles:['gms'],linkedKpis:[]},
+  {id:'s49',initiative:'MAC Notification & Interaction Monitoring',dept:'sales',pillar:'foundation',theme:'Defence & QA',type:'Build',priority:'High',startMonth:4,endMonth:7,linkedRoles:['gms'],linkedKpis:[]},
+
+  // ── FOUNDATION — BD ──
+  {id:'s50',initiative:'BD Playbooks (Partner Onboarding, Reactivation, Escalation)',dept:'bd',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gmbd'],linkedKpis:['Foundational Delivery']},
+  {id:'s51',initiative:'New KPIs Launched (BD KPI Framework)',dept:'bd',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gmbd'],linkedKpis:['Foundational Delivery']},
+  {id:'s52',initiative:'Review of Remuneration & Incentive Structure',dept:'bd',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:1,endMonth:3,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s53',initiative:'Lead Management Process (End-to-End)',dept:'bd',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s54',initiative:'Data Sources — Consolidate & Standardise',dept:'bd',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:1,endMonth:4,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s55',initiative:'Partner Email Sequences (Automated Nurture)',dept:'bd',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:1,endMonth:4,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s56',initiative:'Sales Coaching & Training Program',dept:'bd',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:2,endMonth:6,linkedRoles:['pmtl'],linkedKpis:['Team Capability & Development']},
+  {id:'s57',initiative:'Role Scorecards (PM, SPM, PMTL)',dept:'bd',pillar:'foundation',theme:'Process & Playbooks',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s58',initiative:'Traffic Lighting System (Partner Health Dashboard)',dept:'bd',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gmbd'],linkedKpis:['Foundational Delivery']},
+  {id:'s59',initiative:'Sales QA Coaching (Call Review & Feedback)',dept:'bd',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:2,endMonth:6,linkedRoles:['pmtl'],linkedKpis:[]},
+  {id:'s60',initiative:'Partner Retention Program — Traffic Light Monitoring',dept:'bd',pillar:'foundation',theme:'Performance & Visibility',type:'Build',priority:'High',startMonth:4,endMonth:6,linkedRoles:['rmtl','rm'],linkedKpis:['Partner Retention & Compliance']},
+  {id:'s61',initiative:'Dormant Partner Reactivation (57% → <40%)',dept:'bd',pillar:'foundation',theme:'Performance & Visibility',type:'Action Now',priority:'Critical',startMonth:4,endMonth:6,linkedRoles:['gmbd'],linkedKpis:['Partner Retention & Revenue Protection']},
+  {id:'s62',initiative:'CRM Optimisation (Zoho BD Workflows)',dept:'bd',pillar:'foundation',theme:'CRM & Data',type:'Build',priority:'High',startMonth:1,endMonth:4,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s63',initiative:'Sales Agent — Reduce Admin Burden',dept:'bd',pillar:'foundation',theme:'CRM & Data',type:'Build',priority:'High',startMonth:2,endMonth:5,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s64',initiative:'Enable Partnership_Manager Field in Zoho',dept:'bd',pillar:'foundation',theme:'CRM & Data',type:'Action Now',priority:'High',startMonth:0,endMonth:1,linkedRoles:['gmbd'],linkedKpis:['Foundational Delivery']},
+
+  // ── FOUNDATION — MARKETING ──
+  {id:'s65',initiative:'Website Team Access & CMS Capability',dept:'mktg',pillar:'foundation',theme:'Website & SEO',type:'Action Now',priority:'Critical',startMonth:0,endMonth:1,linkedRoles:['hodm'],linkedKpis:['Digital Acquisition & CRO']},
+  {id:'s66',initiative:'SEO & Content Foundations',dept:'mktg',pillar:'foundation',theme:'Website & SEO',type:'Build',priority:'High',startMonth:1,endMonth:3,linkedRoles:['dml'],linkedKpis:['Organic Acquisition & CRO']},
+  {id:'s67',initiative:'SEO Strategy & Execution',dept:'mktg',pillar:'foundation',theme:'Website & SEO',type:'Build',priority:'High',startMonth:1,endMonth:15,linkedRoles:['dml'],linkedKpis:['Organic Acquisition & CRO']},
+  {id:'s68',initiative:'CRO Process — Automated Optimisation',dept:'mktg',pillar:'foundation',theme:'Website & SEO',type:'Build',priority:'High',startMonth:2,endMonth:4,linkedRoles:['hodm','dml'],linkedKpis:['Digital Acquisition & CRO']},
+  {id:'s69',initiative:'Marketing Automation — Platform & Lead Routing',dept:'mktg',pillar:'foundation',theme:'BI, Automation & Intelligence',type:'Build',priority:'Critical',startMonth:0,endMonth:4,linkedRoles:['cas'],linkedKpis:['Lifecycle & Automation Performance']},
+  {id:'s70',initiative:'Marketing Comms/Campaign Platform',dept:'mktg',pillar:'foundation',theme:'BI, Automation & Intelligence',type:'Build',priority:'High',startMonth:0,endMonth:3,linkedRoles:['gmm'],linkedKpis:['Foundational Delivery']},
+  {id:'s71',initiative:'Reporting & Performance Dashboards',dept:'mktg',pillar:'foundation',theme:'BI, Automation & Intelligence',type:'Build',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['mom'],linkedKpis:['Attribution & Marketing Performance']},
+  {id:'s72',initiative:'BI & Competitive Intelligence',dept:'mktg',pillar:'foundation',theme:'BI, Automation & Intelligence',type:'Build',priority:'High',startMonth:1,endMonth:15,linkedRoles:['hodm'],linkedKpis:['Marketing Ops & Intelligence']},
+  {id:'s73',initiative:'Team Structure, Capability & KPIs',dept:'mktg',pillar:'foundation',theme:'Marketing Team & AI',type:'Action Now',priority:'Critical',startMonth:0,endMonth:3,linkedRoles:['gmm'],linkedKpis:['Team Capability & Restructure']},
+  {id:'s74',initiative:'AI Agent Training & Adoption — 70% of work via AI',dept:'mktg',pillar:'foundation',theme:'Marketing Team & AI',type:'Build',priority:'High',startMonth:1,endMonth:5,linkedRoles:['gmm','ail'],linkedKpis:['Team Capability & Restructure','AI Agent Delivery & Commercial Impact']},
+  {id:'s75',initiative:'Internal Agency Embedded',dept:'mktg',pillar:'foundation',theme:'Marketing Team & AI',type:'Build',priority:'High',startMonth:1,endMonth:3,linkedRoles:['gmm'],linkedKpis:['Foundational Delivery']},
+
+  // ── SCALE — SALES ──
+  {id:'s76',initiative:'Restart Concierge Upsell Function (SM to FC)',dept:'sales',pillar:'scale',theme:'Retention & Upsell',type:'Build',priority:'High',startMonth:7,endMonth:11,linkedRoles:['cec'],linkedKpis:['Utilisation & Concierge Value']},
+  {id:'s77',initiative:'Save Rate Target: 20%+',dept:'sales',pillar:'scale',theme:'Retention & Upsell',type:'Build',priority:'High',startMonth:7,endMonth:11,linkedRoles:['csrs'],linkedKpis:['Client Retention & Churn Reduction']},
+  {id:'s78',initiative:'Build Post-Onboarding Client Nurture Program',dept:'sales',pillar:'scale',theme:'Retention & Upsell',type:'Build',priority:'High',startMonth:7,endMonth:11,linkedRoles:['cec','cas'],linkedKpis:[]},
+  {id:'s79',initiative:'Active Review Generation + AI Sentiment Reviews',dept:'sales',pillar:'scale',theme:'Retention & Upsell',type:'Build',priority:'High',startMonth:7,endMonth:11,linkedRoles:['sme'],linkedKpis:['Social & Reputation']},
+  {id:'s80',initiative:'Concierge Holdout Test (Prove ROI)',dept:'sales',pillar:'scale',theme:'Retention & Upsell',type:'Build',priority:'High',startMonth:7,endMonth:11,linkedRoles:['cec'],linkedKpis:[]},
+  {id:'s81',initiative:'AI CX Call Analysis (100% Coverage)',dept:'sales',pillar:'scale',theme:'Systems & Efficiency',type:'Build',priority:'High',startMonth:7,endMonth:11,linkedRoles:[],linkedKpis:[]},
+  {id:'s82',initiative:'Sales Dialler Embedded',dept:'sales',pillar:'scale',theme:'Systems & Efficiency',type:'Build',priority:'High',startMonth:7,endMonth:11,linkedRoles:[],linkedKpis:[]},
+  {id:'s83',initiative:'Staff Behaviour & Workload Insights',dept:'sales',pillar:'scale',theme:'Systems & Efficiency',type:'Build',priority:'High',startMonth:7,endMonth:11,linkedRoles:[],linkedKpis:[]},
+
+  // ── SCALE — BD ──
+  {id:'s84',initiative:'NDIS Scale — Grow Beyond 20+ Provider Partners',dept:'bd',pillar:'scale',theme:'Scale Existing',type:'Build',priority:'High',startMonth:4,endMonth:9,linkedRoles:['gmbd'],linkedKpis:['Foundational Delivery']},
+  {id:'s85',initiative:'Aged Care Scale — Deepen Existing Partner Volume',dept:'bd',pillar:'scale',theme:'Scale Existing',type:'Build',priority:'High',startMonth:4,endMonth:9,linkedRoles:['gmbd','rmtl'],linkedKpis:['Partner Retention & Revenue Protection']},
+  {id:'s86',initiative:'AI Partner Performance Analyst',dept:'bd',pillar:'scale',theme:'Scale Existing',type:'Build',priority:'High',startMonth:7,endMonth:9,linkedRoles:[],linkedKpis:[]},
+  {id:'s87',initiative:'P1 Providers into RM Team (High-Touch Management)',dept:'bd',pillar:'scale',theme:'Efficiency & Automation',type:'Build',priority:'High',startMonth:4,endMonth:7,linkedRoles:['rmtl','rm'],linkedKpis:['Partner Retention & Compliance']},
+
+  // ── SCALE — MARKETING ──
+  {id:'s88',initiative:'SEO Harvest, Organic Growth & Domain Authority',dept:'mktg',pillar:'scale',theme:'Organic Growth & Content',type:'Build',priority:'High',startMonth:10,endMonth:15,linkedRoles:['dml'],linkedKpis:['Organic Acquisition & CRO']},
+  {id:'s89',initiative:'Content Hub Launch',dept:'mktg',pillar:'scale',theme:'Organic Growth & Content',type:'Build',priority:'High',startMonth:4,endMonth:6,linkedRoles:['ce','hodm'],linkedKpis:['Content Production & Quality']},
+  {id:'s90',initiative:'Build 4,594+ Provider Profile Pages',dept:'mktg',pillar:'scale',theme:'Organic Growth & Content',type:'Build',priority:'Critical',startMonth:7,endMonth:15,linkedRoles:['dml'],linkedKpis:[]},
+  {id:'s91',initiative:'AEO / AI Search Optimisation',dept:'mktg',pillar:'scale',theme:'Organic Growth & Content',type:'Build',priority:'High',startMonth:5,endMonth:9,linkedRoles:['dml'],linkedKpis:['Organic Acquisition & CRO']},
+  {id:'s92',initiative:'Paid Media Scale to $500K Annualised',dept:'mktg',pillar:'scale',theme:'Paid Media & Channels',type:'Build',priority:'High',startMonth:4,endMonth:9,linkedRoles:['hodm','dml'],linkedKpis:['Digital Acquisition & CRO']},
+  {id:'s93',initiative:'Brand Positioning',dept:'mktg',pillar:'scale',theme:'Brand, Lifecycle & AI',type:'Build',priority:'High',startMonth:1,endMonth:9,linkedRoles:['gmm'],linkedKpis:[]},
+  {id:'s94',initiative:'Personalised Lifecycle Comms at Scale',dept:'mktg',pillar:'scale',theme:'Brand, Lifecycle & AI',type:'Build',priority:'High',startMonth:10,endMonth:15,linkedRoles:['cas'],linkedKpis:['Lifecycle & Automation Performance']},
+
+  // ── NET NEW — SALES ──
+  {id:'s95',initiative:'Predictive Churn Scoring (AI)',dept:'sales',pillar:'netnew',theme:'AI & Predictive',type:'Build',priority:'High',startMonth:12,endMonth:15,linkedRoles:['ail'],linkedKpis:[]},
+  {id:'s96',initiative:'AI Chat & Triage Agent (Lead Qualification)',dept:'sales',pillar:'netnew',theme:'AI & Predictive',type:'Build',priority:'High',startMonth:12,endMonth:15,linkedRoles:['ail'],linkedKpis:[]},
+  {id:'s97',initiative:'Predictive LTV Scoring at Point of Sale',dept:'sales',pillar:'netnew',theme:'AI & Predictive',type:'Build',priority:'High',startMonth:12,endMonth:15,linkedRoles:['ail'],linkedKpis:[]},
+  {id:'s98',initiative:'Automated Compliance & Process Audit',dept:'sales',pillar:'netnew',theme:'AI & Predictive',type:'Build',priority:'High',startMonth:12,endMonth:15,linkedRoles:[],linkedKpis:[]},
+  {id:'s99',initiative:'Save Rate Target: 25%+',dept:'sales',pillar:'netnew',theme:'Digital & Self-Service',type:'Build',priority:'High',startMonth:12,endMonth:15,linkedRoles:['csrs'],linkedKpis:['Client Retention & Churn Reduction']},
+  {id:'s100',initiative:'Digital Self-Service Onboarding',dept:'sales',pillar:'netnew',theme:'Digital & Self-Service',type:'Build',priority:'High',startMonth:12,endMonth:15,linkedRoles:[],linkedKpis:[]},
+  {id:'s101',initiative:'Conversational AI for Low-Complexity Retention',dept:'sales',pillar:'netnew',theme:'Digital & Self-Service',type:'Build',priority:'High',startMonth:12,endMonth:15,linkedRoles:['ail'],linkedKpis:[]},
+
+  // ── NET NEW — BD ──
+  {id:'s102',initiative:'Pharmacies (50+ Network Pilot)',dept:'bd',pillar:'netnew',theme:'New Channels',type:'Build',priority:'High',startMonth:10,endMonth:15,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s103',initiative:'Large Partnerships (Insurance — Medibank/Bupa/HCF/nib)',dept:'bd',pillar:'netnew',theme:'New Channels',type:'Build',priority:'High',startMonth:10,endMonth:15,linkedRoles:['gmbd'],linkedKpis:['Foundational Delivery']},
+  {id:'s104',initiative:'Industry Events & Expo Presence',dept:'bd',pillar:'netnew',theme:'New Channels',type:'Needs Analysis',priority:'High',startMonth:10,endMonth:15,linkedRoles:['eme'],linkedKpis:['Event Delivery & Lead Generation']},
+  {id:'s105',initiative:'Health Referral Network (GP/Allied/Discharge)',dept:'bd',pillar:'netnew',theme:'New Channels',type:'Build',priority:'High',startMonth:10,endMonth:15,linkedRoles:[],linkedKpis:[]},
+  {id:'s106',initiative:'Revenue Share Models',dept:'bd',pillar:'netnew',theme:'New Channels',type:'Build',priority:'Medium',startMonth:12,endMonth:15,linkedRoles:[],linkedKpis:[]},
+
+  // ── NET NEW — MARKETING ──
+  {id:'s107',initiative:'Pre-Package & NDIS Transition Content Hub',dept:'mktg',pillar:'netnew',theme:'First Mover Content & Search',type:'Build',priority:'High',startMonth:6,endMonth:12,linkedRoles:['ce','hodm'],linkedKpis:['Content Production & Quality']},
+  {id:'s108',initiative:'AI Search Scale — AEO 70%+',dept:'mktg',pillar:'netnew',theme:'First Mover Content & Search',type:'Build',priority:'High',startMonth:10,endMonth:15,linkedRoles:['dml'],linkedKpis:['Organic Acquisition & CRO']},
+  {id:'s109',initiative:'AI Chatbot for Lead Qualification',dept:'mktg',pillar:'netnew',theme:'AI Innovation & Channel Expansion',type:'Build',priority:'High',startMonth:8,endMonth:11,linkedRoles:['ail'],linkedKpis:['AI Agent Delivery & Commercial Impact']},
+  {id:'s110',initiative:'Predictive Lead Scoring (ML)',dept:'mktg',pillar:'netnew',theme:'AI Innovation & Channel Expansion',type:'Build',priority:'High',startMonth:10,endMonth:15,linkedRoles:['ail'],linkedKpis:[]},
+  {id:'s111',initiative:'Partnership Scale (Pharmacy, NDIS, Health)',dept:'mktg',pillar:'netnew',theme:'AI Innovation & Channel Expansion',type:'Build',priority:'High',startMonth:10,endMonth:15,linkedRoles:['gmbd'],linkedKpis:[]},
+  {id:'s112',initiative:'Channel Expansion & BD Enablement',dept:'mktg',pillar:'netnew',theme:'AI Innovation & Channel Expansion',type:'Needs Analysis',priority:'Medium',startMonth:10,endMonth:15,linkedRoles:[],linkedKpis:[]},
+];
+
 // ── STATE ──
-const state = { view:'detail', selectedRole:null, archFilter:'all', progFilter:'all' };
+const state = { view:'detail', selectedRole:null, archFilter:'all', progFilter:'all', stratDeptFilter:'all', stratPillarFilter:'all', stratSelectedInit:null };
 
 // ── INIT ──
 function init() {
@@ -1368,6 +1590,7 @@ function renderCenter() {
     else c.innerHTML = '<div class="detail-empty">Select a role from the tree to see the full cascade — selected role + all direct reports with KPI detail</div>';
   } else if (state.view === 'compare') renderCompare(c);
   else if (state.view === 'principles') renderPrinciples(c);
+  else if (state.view === 'strategy') renderStrategy(c);
 }
 
 // Build a single role's KPI card HTML
@@ -1415,6 +1638,17 @@ function buildRoleCard(r, isSelected) {
     </div>`;
   });
 
+  // Strategy initiatives linked to this role
+  const linkedInits = strategyData.filter(s => s.linkedRoles.includes(r.id));
+  let stratHtml = '';
+  if (linkedInits.length) {
+    stratHtml = '<div class="strategy-section-label">Strategy Initiatives (' + linkedInits.length + ')</div><div style="margin-bottom:4px">';
+    linkedInits.forEach(s => {
+      stratHtml += `<span class="strategy-pill ${s.pillar}" onclick="event.stopPropagation();showStrategyInit('${s.id}')" title="${s.initiative}">${s.initiative}</span>`;
+    });
+    stratHtml += '</div>';
+  }
+
   return `<div class="cascade-role${isSelected ? ' is-selected' : ''}">
     <div class="cr-header" onclick="selectRole('${r.id}')">
       <div class="arch-dot" style="background:${ARCH_COLORS[r.arch]};width:10px;height:10px"></div>
@@ -1426,6 +1660,7 @@ function buildRoleCard(r, isSelected) {
     <div class="cr-body">
       <div class="kpi-summary-bar">${barHtml}</div>
       ${sectionsHtml}
+      ${stratHtml}
     </div>
   </div>`;
 }
@@ -1636,6 +1871,211 @@ function renderPrinciples(container) {
     </ol>
 
   </div>`;
+}
+
+// ── STRATEGY VIEW ──
+function showStrategyInit(id) {
+  state.stratSelectedInit = id;
+  switchView('strategy');
+}
+
+function setStratDept(v) {
+  state.stratDeptFilter = v;
+  state.stratSelectedInit = null;
+  renderStrategy(document.getElementById('center'));
+}
+function setStratPillar(v) {
+  state.stratPillarFilter = v;
+  state.stratSelectedInit = null;
+  renderStrategy(document.getElementById('center'));
+}
+
+function renderStrategy(container) {
+  const df = state.stratDeptFilter;
+  const pf = state.stratPillarFilter;
+  let filtered = strategyData.filter(s => {
+    if (df !== 'all' && s.dept !== df) return false;
+    if (pf !== 'all' && s.pillar !== pf) return false;
+    return true;
+  });
+
+  const DEPT_NAMES = {sales:'Sales',bd:'BD',mktg:'Marketing'};
+
+  // Controls
+  let h = '<div class="strategy-controls">';
+  h += '<div class="ctrl-group"><span class="ctrl-group-label">Dept</span>';
+  ['all','sales','bd','mktg'].forEach(v => {
+    const label = v === 'all' ? 'All' : DEPT_NAMES[v];
+    h += `<div class="org-btn${df===v?' active':''}" onclick="setStratDept('${v}')">${label}</div>`;
+  });
+  h += '</div><div class="ctrl-group" style="margin-left:12px"><span class="ctrl-group-label">Pillar</span>';
+  ['all','tsunami','foundation','scale','netnew'].forEach(v => {
+    const label = v === 'all' ? 'All' : PILLAR_NAMES[v];
+    const style = v !== 'all' && pf === v ? `background:${PILLAR_COLORS[v]};color:${v==='tsunami'?'#000':'#fff'};border-color:${PILLAR_COLORS[v]}` : '';
+    h += `<div class="org-btn${pf===v?' active':''}" style="${style}" onclick="setStratPillar('${v}')">${label}</div>`;
+  });
+  h += '</div></div>';
+
+  // Stats
+  const total = filtered.length;
+  const linked = filtered.filter(s => s.linkedRoles.length > 0).length;
+  const gaps = total - linked;
+  const bySales = filtered.filter(s => s.dept === 'sales').length;
+  const byBD = filtered.filter(s => s.dept === 'bd').length;
+  const byMktg = filtered.filter(s => s.dept === 'mktg').length;
+  h += '<div class="strategy-stats">';
+  h += `<div class="strategy-stat"><div class="stat-val">${total}</div><div class="stat-label">Total</div></div>`;
+  h += `<div class="strategy-stat"><div class="stat-val" style="color:#22c55e">${linked}</div><div class="stat-label">KPI Linked</div></div>`;
+  h += `<div class="strategy-stat gap"><div class="stat-val">${gaps}</div><div class="stat-label">Gaps</div></div>`;
+  h += `<div class="strategy-stat"><div class="stat-val" style="color:var(--text-dim);font-size:14px">${bySales}S / ${byBD}BD / ${byMktg}M</div><div class="stat-label">By Dept</div></div>`;
+  h += '</div>';
+
+  // Group by pillar then theme
+  const pillarOrder = ['tsunami','foundation','scale','netnew'];
+  const groups = {};
+  filtered.forEach(s => {
+    const key = s.pillar + '||' + s.theme;
+    if (!groups[key]) groups[key] = {pillar:s.pillar, theme:s.theme, items:[]};
+    groups[key].items.push(s);
+  });
+  const sortedKeys = Object.keys(groups).sort((a,b) => {
+    const pa = pillarOrder.indexOf(groups[a].pillar), pb = pillarOrder.indexOf(groups[b].pillar);
+    if (pa !== pb) return pa - pb;
+    return groups[a].theme.localeCompare(groups[b].theme);
+  });
+
+  // Gantt
+  h += '<div class="gantt-container">';
+  // Header
+  h += '<div class="gantt-header"><div class="gh-label">Initiative</div>';
+  MONTHS.forEach(m => { h += `<div class="gh-month">${m}</div>`; });
+  h += '<div class="gh-link">KPI</div></div>';
+
+  let currentPillar = null;
+  let currentTheme = null;
+  sortedKeys.forEach(key => {
+    const g = groups[key];
+    if (g.pillar !== currentPillar) {
+      currentPillar = g.pillar;
+      currentTheme = null;
+      h += `<div class="gantt-group-label ${g.pillar}">${PILLAR_NAMES[g.pillar]} — ${DEPT_NAMES[df] || 'All Depts'}</div>`;
+    }
+    if (g.theme !== currentTheme) {
+      currentTheme = g.theme;
+      h += `<div class="gantt-theme-label">${g.theme}</div>`;
+    }
+    g.items.forEach(s => {
+      const sel = state.stratSelectedInit === s.id ? ' selected' : '';
+      const prioColor = s.priority === 'Critical' ? '#ef4444' : s.priority === 'High' ? '#f97316' : '#6b7280';
+      const typeClass = s.type === 'Action Now' ? 'action' : s.type === 'Build' ? 'build' : 'needs-analysis';
+      const typeLabel = s.type === 'Action Now' ? 'NOW' : s.type === 'Build' ? 'BUILD' : 'TBD';
+
+      h += `<div class="gantt-row${sel}" data-sid="${s.id}" onclick="selectStratInit('${s.id}')">`;
+      h += `<div class="gantt-label" title="${s.initiative}">`;
+      h += `<span class="priority-badge" style="background:${prioColor}"></span>`;
+      h += `<span class="type-badge ${typeClass}">${typeLabel}</span>`;
+      h += `<span class="init-name">${s.initiative}</span>`;
+      h += '</div>';
+
+      // Timeline cells
+      h += '<div class="gantt-timeline">';
+      for (let m = 0; m < 16; m++) {
+        h += '<div class="gantt-cell">';
+        if (m === s.startMonth) {
+          const span = s.endMonth - s.startMonth + 1;
+          const w = span * 60 - 4;
+          const striped = s.type === 'Build' ? ' striped' : '';
+          h += `<div class="gantt-bar ${s.pillar}${striped}" style="width:${w}px;left:2px"></div>`;
+        }
+        h += '</div>';
+      }
+      h += '</div>';
+
+      // Link indicator
+      if (s.linkedRoles.length > 0) {
+        h += '<div class="link-indicator linked" title="Has KPI coverage">&#10003;</div>';
+      } else {
+        h += '<div class="link-indicator gap" title="No KPI coverage">&#9888;</div>';
+      }
+      h += '</div>';
+    });
+  });
+  h += '</div>'; // end gantt-container
+
+  // Detail panel for selected initiative
+  if (state.stratSelectedInit) {
+    const s = strategyData.find(x => x.id === state.stratSelectedInit);
+    if (s) {
+      const pillarColor = PILLAR_COLORS[s.pillar];
+      const prioColor = s.priority === 'Critical' ? '#ef4444' : s.priority === 'High' ? '#f97316' : '#6b7280';
+      h += '<div class="initiative-detail">';
+      h += `<h4>${s.initiative}</h4>`;
+      h += '<div class="id-meta">';
+      h += `<span class="id-tag" style="background:${pillarColor}22;color:${pillarColor}">${PILLAR_NAMES[s.pillar]}</span>`;
+      h += `<span class="id-tag" style="background:${prioColor}22;color:${prioColor}">${s.priority}</span>`;
+      h += `<span class="id-tag" style="background:var(--surface3);color:var(--text-dim)">${s.type}</span>`;
+      h += `<span class="id-tag" style="background:var(--surface3);color:var(--text-dim)">${DEPT_NAMES[s.dept]}</span>`;
+      h += `<span class="id-tag" style="background:var(--surface3);color:var(--text-dim)">${MONTHS[s.startMonth]} — ${MONTHS[s.endMonth]}</span>`;
+      h += '</div>';
+
+      if (s.linkedRoles.length > 0) {
+        h += '<div class="id-linked"><h5>Linked Roles & KPIs</h5>';
+        s.linkedRoles.forEach(rid => {
+          const role = roles.find(x => x.id === rid);
+          if (role) {
+            h += `<span class="id-role-link" onclick="event.stopPropagation();selectRole('${rid}')">${role.name}</span>`;
+          }
+        });
+        if (s.linkedKpis.length > 0) {
+          h += '<div style="margin-top:6px;font-size:11px;color:var(--text-dim)">KPIs: ' + s.linkedKpis.join(', ') + '</div>';
+        }
+        h += '</div>';
+      } else {
+        h += '<div class="id-gap">\u26A0 GAP — No KPI coverage for this initiative</div>';
+      }
+      h += '</div>';
+    }
+  }
+
+  // Gap Analysis panel
+  const allGaps = (df === 'all' && pf === 'all' ? strategyData : filtered).filter(s => s.linkedRoles.length === 0);
+  if (allGaps.length > 0) {
+    const totalAll = df === 'all' && pf === 'all' ? strategyData.length : filtered.length;
+    h += '<div class="gap-panel">';
+    h += `<div class="gap-panel-header" onclick="this.parentElement.querySelector(\'.gap-panel-body\').style.display=this.parentElement.querySelector(\'.gap-panel-body\').style.display===\'none\'?\'block\':\'none\'">`;
+    h += `<h4>\u26A0 Gap Analysis</h4><span class="gap-count">${allGaps.length} of ${totalAll} initiatives have no KPI coverage</span>`;
+    h += '</div><div class="gap-panel-body">';
+
+    ['sales','bd','mktg'].forEach(dept => {
+      const deptGaps = allGaps.filter(s => s.dept === dept);
+      if (deptGaps.length === 0) return;
+      h += `<div class="gap-dept">${DEPT_NAMES[dept]} (${deptGaps.length})</div>`;
+      deptGaps.forEach(s => {
+        const pillarColor = PILLAR_COLORS[s.pillar];
+        const prioColor = s.priority === 'Critical' ? '#ef4444' : s.priority === 'High' ? '#f97316' : '#6b7280';
+        h += `<div class="gap-item">`;
+        h += `<span class="gap-pillar" style="background:${pillarColor}22;color:${pillarColor}">${PILLAR_NAMES[s.pillar]}</span>`;
+        h += `<span>${s.initiative}</span>`;
+        h += `<span class="gap-priority" style="color:${prioColor}">${s.priority}</span>`;
+        h += `</div>`;
+      });
+    });
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+  container.scrollTop = 0;
+
+  // Scroll selected row into view
+  if (state.stratSelectedInit) {
+    const row = container.querySelector(`.gantt-row[data-sid="${state.stratSelectedInit}"]`);
+    if (row) row.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function selectStratInit(id) {
+  state.stratSelectedInit = state.stratSelectedInit === id ? null : id;
+  renderStrategy(document.getElementById('center'));
 }
 
 // Password gate
